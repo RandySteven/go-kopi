@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"go_framework_dev/queries"
+	"github.com/RandySteven/go-kopi/queries"
 	"log"
 	"reflect"
 	"strings"

@@ -1,6 +1,6 @@
 package apps
 
-import "go_framework_dev/interfaces/usecases"
+import "github.com/RandySteven/go-kopi/interfaces/usecases"
 
 type Usecases struct {
 	UserUsecase usecases.IUserUsecase

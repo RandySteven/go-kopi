@@ -2,9 +2,9 @@ package usecases
 
 import (
 	"context"
-	"go_framework_dev/apperror"
-	"go_framework_dev/entities/payloads/requests"
-	"go_framework_dev/entities/payloads/responses"
+	"github.com/RandySteven/go-kopi/apperror"
+	"github.com/RandySteven/go-kopi/entities/payloads/requests"
+	"github.com/RandySteven/go-kopi/entities/payloads/responses"
 )
 
 type IUserUsecase interface {

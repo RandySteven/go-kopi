@@ -1,6 +1,6 @@
 package apps
 
-import "go_framework_dev/interfaces/handlers"
+import "github.com/RandySteven/go-kopi/interfaces/handlers"
 
 type Handlers struct {
 	UserHandler handlers.IUserHandler

@@ -3,11 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/RandySteven/go-kopi/entities/payloads/responses"
 	"github.com/iancoleman/strcase"
 	"log"
 	"net/http"
 	"reflect"
-	"task_mission/entities/dtos/responses"
 )
 
 func ContentType(w http.ResponseWriter, contentType string) {

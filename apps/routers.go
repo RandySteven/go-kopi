@@ -1,7 +1,7 @@
 package apps
 
 import (
-	"go_framework_dev/enums"
+	"github.com/RandySteven/go-kopi/enums"
 	"net/http"
 )
 
