@@ -3,7 +3,7 @@ export
 
 
 yaml_file = ./files/yml/configs/task.local.yml
-cmd_folder = ./cmd/task_mission/
+cmd_folder = ./cmd/
 gorun = @go run
 
 ifeq ($(ENV),prod)
@@ -15,6 +15,9 @@ else ifeq ($(ENV),dev)
 else
 	$(error unknown variable in .env file)
 endif
+
+test:
+	${gorun} ${cmd_folder}main -config ./files/yml/app.local.yml
 
 run:
 	${gorun} ${cmd_folder}cmd -config ${yaml_file}

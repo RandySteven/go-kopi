@@ -1,5 +1,5 @@
 package queries
 
 const (
-	DropUser DropTable = `DROP TABLE IF EXISTS users;`
+	MigrateUser TableMigration = `CREATE TABLE IF NOT EXISTS users ()`
 )
