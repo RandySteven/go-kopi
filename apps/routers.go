@@ -2,6 +2,7 @@ package apps
 
 import (
 	"github.com/RandySteven/go-kopi/enums"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -24,4 +25,13 @@ func NewEndpointRouters(h *Handlers) map[enums.RouterPrefix][]EndpointRouter {
 	}
 
 	return endpointRouters
+}
+
+func (h *Handlers) InitRouter(r *mux.Router) {
+	mapRouters := NewEndpointRouters(h)
+
+	authRouter := r.PathPrefix(enums.AuthPrefix.ToString()).Subrouter()
+	for _, router := range mapRouters[enums.AuthPrefix] {
+		authRouter.HandleFunc(router.path, router.handler).Methods(router.method)
+	}
 }

@@ -20,7 +20,7 @@ test:
 	${gorun} ${cmd_folder}main -config ./files/yml/app.local.yml
 
 run:
-	${gorun} ${cmd_folder}cmd -config ${yaml_file}
+	${gorun} ${cmd_folder}main -config ./files/yaml/app.local.yml
 
 migration:
 	${gorun} ${cmd_folder}migration -config ${yaml_file}

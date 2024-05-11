@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"github.com/RandySteven/go-kopi/apps"
 	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/pkg/db"
 	"github.com/gorilla/mux"
 	"log"
 )
@@ -29,25 +32,22 @@ func main() {
 		return
 	}
 
-	//repositories, err := db.NewRepositories(config)
-	//if err != nil {
-	//	log.Fatal(err)
-	//	return
-	//}
-	//
-	//services, err := apps.NewServices(context.Background())
-	//if err != nil {
-	//	log.Fatal(err)
-	//	return
-	//}
-	//
-	//handlers := apps.NewHandlers(repositories, services)
-	//
+	repositories, err := db.NewRepositories(config)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	services, err := apps.NewServices(context.Background())
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	handlers := apps.NewHandlers(repositories, services)
+
 	r := mux.NewRouter()
-	//
-	//
-	//apps.RegisterMiddleware(r)
-	//
-	//handlers.InitRouter(r)
+	apps.RegisterMiddleware(r)
+	handlers.InitRouter(r)
 	config.Run(r)
 }
