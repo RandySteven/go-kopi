@@ -32,6 +32,7 @@ func Save[T any](ctx context.Context, db *sql.DB, query queries.GoQuery, request
 
 func FindAll[T any](ctx context.Context, db *sql.DB, query queries.GoQuery, requests *T) (result []*T, err error) {
 	err = QueryValidation(query, selectQuery)
+	requests = new(T)
 	if err != nil {
 		return nil, err
 	}
