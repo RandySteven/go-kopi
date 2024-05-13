@@ -2,10 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"github.com/RandySteven/go-kopi/queries"
 	"golang.org/x/crypto/bcrypt"
 	"path"
 	"strings"
-	"task_mission/queries"
 )
 
 func QueryValidation(query queries.GoQuery, command string) error {
@@ -33,7 +33,7 @@ func ValidateFileType(fileName string) bool {
 		"jpeg",
 		"png",
 	}
- 
+
 	flag := false
 
 	for _, imageFileExt := range imageFileExts {
