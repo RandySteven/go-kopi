@@ -22,5 +22,12 @@ type (
 			DbUser string `yaml:"dbuser"`
 			DbPass string `yaml:"dbpass"`
 		} `yaml:"postgres"`
+
+		Mongodb struct {
+			User     string `yaml:"user"`
+			Password string `yaml:"password"`
+			Host     string `yaml:"host"`
+			DbName   string `yaml:"dbname"`
+		} `yaml:"mongodb"`
 	}
 )
