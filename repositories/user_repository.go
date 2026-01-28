@@ -2,52 +2,56 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
+
 	"github.com/RandySteven/go-kopi/entities/models"
-	"github.com/RandySteven/go-kopi/interfaces/repositories"
-	"github.com/RandySteven/go-kopi/utils"
+	repository_interfaces "github.com/RandySteven/go-kopi/interfaces/repositories"
+	mysql_client "github.com/RandySteven/go-kopi/pkg/db"
 )
 
 type userRepository struct {
-	db *sql.DB
+	dbx repository_interfaces.DBX
 }
 
-func (u *userRepository) Save(ctx context.Context, request *models.User) (result *uint64, err error) {
-	return utils.Save[models.User](ctx, u.db, ``, request)
-}
-
-func (u *userRepository) FindAll(ctx context.Context) (result []*models.User, err error) {
-	var user = &models.User{}
-	result, err = utils.FindAll[models.User](ctx, u.db, ``, user)
+func (u *userRepository) Save(ctx context.Context, entity *models.User) (result *models.User, err error) {
+	id, err := mysql_client.Save[models.User](ctx, u.dbx(ctx), ``, entity)
 	if err != nil {
 		return nil, err
+	}
+	result = &models.User{
+		ID: *id,
 	}
 	return result, nil
 }
 
-func (u *userRepository) Find(ctx context.Context, id uint64) (result *models.User, err error) {
+func (u *userRepository) FindByID(ctx context.Context, id uint64) (result *models.User, err error) {
 	result = &models.User{}
-	err = utils.FindByID[models.User](ctx, u.db, ``, id, result)
+	err = mysql_client.FindByID[models.User](ctx, u.dbx(ctx), ``, id, result)
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (u *userRepository) Delete(ctx context.Context, id uint64) (err error) {
-	//TODO implement me
-	panic("implement me")
+func (u *userRepository) FindAll(ctx context.Context, skip uint64, take uint64) (result []*models.User, err error) {
+	result, err = mysql_client.FindAll[models.User](ctx, u.dbx(ctx), ``)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (u *userRepository) Update(ctx context.Context, request *models.User) (result *models.User, err error) {
-	//TODO implement me
-	panic("implement me")
+func (u *userRepository) Update(ctx context.Context, entity *models.User) (result *models.User, err error) {
+	return
 }
 
-func NewUserRepository(db *sql.DB) *userRepository {
+func (u *userRepository) DeleteByID(ctx context.Context, id uint64) (err error) {
+	return
+}
+
+func NewUserRepository(dbx repository_interfaces.DBX) *userRepository {
 	return &userRepository{
-		db: db,
+		dbx: dbx,
 	}
 }
 
-var _ repositories.IUserRepository = &userRepository{}
+var _ repository_interfaces.UserRepository = &userRepository{}

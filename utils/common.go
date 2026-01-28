@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -30,4 +32,28 @@ func GetFieldsOfObject(object interface{}) []string {
 		fields = append(fields, field)
 	}
 	return fields
+}
+
+func ReplaceLastURLID(url string) string {
+	return strings.Replace(url, "/{id}", "", -1)
+}
+
+func WriteLogFile() (*os.File, error) {
+	year, month, day := time.Now().Date()
+	monthStr, dayStr := fmt.Sprintf("%d", month), fmt.Sprintf("%d", day)
+	if month < 10 {
+		monthStr = "0" + monthStr
+	}
+	if day < 10 {
+		dayStr = "0" + dayStr
+	}
+	dateFile := fmt.Sprintf("%d%s%s.log", year, monthStr, dayStr)
+
+	logFile, err := os.OpenFile(dateFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return logFile, nil
 }

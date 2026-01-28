@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/RandySteven/go-kopi/apps"
-	"github.com/RandySteven/go-kopi/pkg/config"
-	"github.com/RandySteven/go-kopi/pkg/db"
-	"github.com/gorilla/mux"
 	"log"
+
+	"github.com/RandySteven/go-kopi/apps"
+	api_http "github.com/RandySteven/go-kopi/handlers/https"
+	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/routes"
+	"github.com/RandySteven/go-kopi/usecases"
+	"github.com/gorilla/mux"
 )
 
 func init() {
@@ -38,16 +41,16 @@ func main() {
 		return
 	}
 
-	services, err := apps.NewServices(context.Background())
+	usecases := usecases.NewUsecases()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	handlers := apps.NewHandlers(repositories, services)
+	apiHttp := api_http.NewHTTPs(usecases)
 
 	r := mux.NewRouter()
 	apps.RegisterMiddleware(r)
-	handlers.InitRouter(r)
+	routes.InitRouter(apiHttp, r)
 	config.Run(r)
 }

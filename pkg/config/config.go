@@ -29,5 +29,11 @@ type (
 			Host     string `yaml:"host"`
 			DbName   string `yaml:"dbname"`
 		} `yaml:"mongodb"`
+
+		Redis struct {
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Password string `yaml:"password"`
+		} `yaml:"redis"`
 	}
 )

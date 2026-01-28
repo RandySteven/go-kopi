@@ -2,10 +2,11 @@ package usecases
 
 import (
 	"context"
+
 	"github.com/RandySteven/go-kopi/apperror"
 	"github.com/RandySteven/go-kopi/entities/payloads/requests"
 	"github.com/RandySteven/go-kopi/entities/payloads/responses"
-	"github.com/RandySteven/go-kopi/interfaces/usecases"
+	usecases_interfaces "github.com/RandySteven/go-kopi/interfaces/usecases"
 )
 
 type userUsecase struct{}
@@ -18,4 +19,4 @@ func (u *userUsecase) LoginUser(ctx context.Context, request *requests.UserLogin
 	return
 }
 
-var _ usecases.IUserUsecase = &userUsecase{}
+var _ usecases_interfaces.UserUsecase = &userUsecase{}

@@ -1,29 +1,54 @@
-package db
+package mysql_client
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"github.com/RandySteven/go-kopi/interfaces/repositories"
+	"log"
+	"time"
+
 	"github.com/RandySteven/go-kopi/pkg/config"
 	_ "github.com/jackc/pgx/v5"
 	_ "github.com/lib/pq"
-	"log"
-	"time"
 )
 
 /*
 ### Repositories
 <p>In repositories struct you can inject repository interface in Repositories</p>
 */
-type Repositories struct {
-	/*
-		####Dependencies injection
-	*/
-	UserRepository repositories.IUserRepository
-	db             *sql.DB
+type (
+	MySQL interface {
+		Close()
+		Ping() error
+		Client() *sql.DB
+		Migration(ctx context.Context) error
+	}
+	mysqlClient struct {
+		db *sql.DB
+	}
+)
+
+// Client implements [MySQL].
+func (m *mysqlClient) Client() *sql.DB {
+	return m.db
 }
 
-func NewRepositories(config *config.Config) (*Repositories, error) {
+// Close implements [MySQL].
+func (m *mysqlClient) Close() {
+	m.db.Close()
+}
+
+// Migration implements [MySQL].
+func (m *mysqlClient) Migration(ctx context.Context) error {
+	return nil
+}
+
+// Ping implements [MySQL].
+func (m *mysqlClient) Ping() error {
+	return m.db.Ping()
+}
+
+func NewMYSQLClient(config *config.Config) (*mysqlClient, error) {
 	conn := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=require",
 		config.Postgres.DbUser,
 		config.Postgres.DbPass,
@@ -44,7 +69,9 @@ func NewRepositories(config *config.Config) (*Repositories, error) {
 		db.Close()
 		return nil, err
 	}
-	return &Repositories{
+	return &mysqlClient{
 		db: db,
 	}, nil
 }
+
+var _ MySQL = &mysqlClient{}
