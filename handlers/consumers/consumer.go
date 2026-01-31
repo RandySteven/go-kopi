@@ -27,12 +27,6 @@ type (
 	}
 )
 
-func consume(ctx context.Context, fn func(ctx context.Context)) {
-	for {
-		fn(ctx)
-	}
-}
-
 func InitRunner(nsq nsq_client.Nsq) *Runners {
 	return &Runners{
 		nsq:          nsq,
