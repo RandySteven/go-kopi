@@ -1,15 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-
-	"github.com/RandySteven/go-kopi/apps"
-	api_http "github.com/RandySteven/go-kopi/handlers/https"
-	"github.com/RandySteven/go-kopi/pkg/config"
-	"github.com/RandySteven/go-kopi/routes"
-	"github.com/RandySteven/go-kopi/usecases"
-	"github.com/gorilla/mux"
 )
 
 func init() {
@@ -22,35 +14,34 @@ func init() {
 }
 
 func main() {
-	configPath, err := config.ParseFlags()
+	// configPath, err := config.ParseFlags()
 
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	config, err := config.NewConfig(configPath)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// config, err := config.NewConfig(configPath)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	repositories, err := db.NewRepositories(config)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// repositories, err := db.NewRepositories(config)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	usecases := usecases.NewUsecases()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// usecases := usecases.NewUsecases()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	apiHttp := api_http.NewHTTPs(usecases)
+	// apiHttp := api_http.NewHTTPs(usecases)
 
-	r := mux.NewRouter()
-	apps.RegisterMiddleware(r)
-	routes.InitRouter(apiHttp, r)
-	config.Run(r)
+	// r := mux.NewRouter()
+	// routes.InitRouter(apiHttp, r)
+	// config.Run(r)
 }

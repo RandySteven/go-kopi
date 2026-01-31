@@ -48,7 +48,7 @@ func (u *userRepository) DeleteByID(ctx context.Context, id uint64) (err error) 
 	return
 }
 
-func NewUserRepository(dbx repository_interfaces.DBX) *userRepository {
+func newUserRepository(dbx repository_interfaces.DBX) *userRepository {
 	return &userRepository{
 		dbx: dbx,
 	}

@@ -1,0 +1,92 @@
+package nsq_client
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/nsqio/go-nsq"
+)
+
+type (
+	Nsq interface {
+		Publish(ctx context.Context, topic string, body []byte) error
+		Consume(ctx context.Context, topic string) (string, error)
+		RegisterConsumer(topic string, handlerFunc func(context.Context, string)) error
+	}
+
+	nsqClient struct {
+		pub     *nsq.Producer
+		config  *config.Config
+		lookupd string
+	}
+
+	Publish interface {
+		Publish(ctx context.Context, topic string, body []byte) error
+	}
+
+	Consume interface {
+		Consume(ctx context.Context, topic string) (string, error)
+	}
+)
+
+func NewNsqClient(cfg *config.Config) (*nsqClient, error) {
+	nsqConfig := nsq.NewConfig()
+
+	// addr := fmt.Sprintf("%s:%s", cfg.Config.Nsq.NSQDHost, cfg.Config.Nsq.NSQDTCPPort)
+	addr := ""
+	producer, err := nsq.NewProducer(addr, nsqConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create NSQ producer: %w", err)
+	}
+
+	lookupd := ""
+
+	return &nsqClient{
+		pub:    producer,
+		config: cfg,
+		// lookupd: fmt.Sprintf("%s:%s", cfg.Config.Nsq.NSQDHost, cfg.Config.Nsq.LookupdHttpPort),
+		lookupd: lookupd,
+	}, nil
+}
+
+func (n *nsqClient) RegisterConsumer(topic string, handlerFunc func(context.Context, string)) error {
+	nsqConfig := nsq.NewConfig()
+	log.Println("Creating NSQ consumer for topic:", topic)
+
+	consumer, err := nsq.NewConsumer(topic, "channel", nsqConfig)
+	if err != nil {
+		return fmt.Errorf("failed to create NSQ consumer: %w", err)
+	}
+
+	consumer.AddHandler(nsq.HandlerFunc(func(msg *nsq.Message) error {
+		body := string(msg.Body)
+		ctx := context.WithValue(context.Background(), topic, body)
+		ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+		defer cancel()
+
+		if err := func() error {
+			handlerFunc(ctx, topic)
+			return nil
+		}(); err != nil {
+			log.Println("Error in handlerFunc:", err)
+			msg.Requeue(-1)
+			return err
+		}
+
+		return nil
+	}))
+
+	// lookupAddr := fmt.Sprintf("%s:%s", n.config.Config.Nsq.NSQDHost, n.config.Config.Nsq.LookupdHttpPort)
+	lookupAddr := ""
+	log.Println("Connecting to nsqlookupd at", lookupAddr)
+
+	if err := consumer.ConnectToNSQLookupd(lookupAddr); err != nil {
+		return fmt.Errorf("failed to connect to NSQ lookupd: %w", err)
+	}
+
+	log.Println("NSQ consumer registered and running... for topic ", topic)
+	return nil
+}
