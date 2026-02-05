@@ -17,17 +17,17 @@ Create a new project from this template with a single command:
 
 ```bash
 # Clone and set up a new project
-curl -fsSL https://raw.githubusercontent.com/randy-steven/go-kopi/v2/install.sh | bash -s -- init -n my-project
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/install.sh | bash -s -- init -n my-project
 
 # Or with your own git remote
-curl -fsSL https://raw.githubusercontent.com/randy-steven/go-kopi/v2/install.sh | bash -s -- init -n my-project -r https://github.com/youruser/my-project.git
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/install.sh | bash -s -- init -n my-project -r https://github.com/youruser/my-project.git
 ```
 
 ### Manual Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/randy-steven/go-kopi.git my-project
+git clone https://github.com/RandySteven/go-kopi.git my-project
 cd my-project
 
 # Run setup
