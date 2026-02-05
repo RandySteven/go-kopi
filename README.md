@@ -11,16 +11,16 @@ A Go backend framework with clean architecture, supporting multiple databases, c
 
 ## Quick Start
 
-### One-Line Installation
+### Ask Barista ☕
 
-Create a new project from this template with a single command:
+Create a new project by asking your barista to brew one:
 
 ```bash
-# Clone and set up a new project
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/install.sh | bash -s -- init -n my-project
+# Brew a fresh project
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project
 
 # Or with your own git remote
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/install.sh | bash -s -- init -n my-project -r https://github.com/youruser/my-project.git
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
 ```
 
 ### Manual Installation
@@ -31,29 +31,29 @@ git clone https://github.com/RandySteven/go-kopi.git my-project
 cd my-project
 
 # Run setup
-./install.sh setup
+./barista setup
 
 # Change remote to your own repository
-./install.sh remote -r https://github.com/youruser/my-project.git
+./barista remote -r https://github.com/youruser/my-project.git
 ```
 
-### Installer Commands
+### Barista Commands
 
 | Command | Description |
 |---------|-------------|
-| `./install.sh clone -n <name>` | Clone to a new project directory |
-| `./install.sh setup` | Set up config files and install dependencies |
-| `./install.sh remote -r <url>` | Change git remote to your own repo |
-| `./install.sh pull` | Pull latest updates from upstream go-kopi |
-| `./install.sh init -n <name> -r <url>` | Full initialization (clone + setup + remote) |
-| `./install.sh help` | Show help message |
+| `./barista brew -n <name>` | Brew a fresh project (clone + setup + remote) |
+| `./barista clone -n <name>` | Clone to a new project directory |
+| `./barista setup` | Set up config files and install dependencies |
+| `./barista remote -r <url>` | Change git remote to your own repo |
+| `./barista refill` | Refill with latest updates from upstream go-kopi |
+| `./barista help` | Show help message |
 
 ### Keeping Up to Date
 
-After changing your remote, you can still pull updates from the original go-kopi:
+After changing your remote, you can still get refills from the original go-kopi:
 
 ```bash
-./install.sh pull
+./barista refill
 ```
 
 This will merge the latest changes while preserving your customizations.
