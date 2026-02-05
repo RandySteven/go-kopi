@@ -9,6 +9,55 @@
 
 A Go backend framework with clean architecture, supporting multiple databases, caching, and message queues.
 
+## Quick Start
+
+### One-Line Installation
+
+Create a new project from this template with a single command:
+
+```bash
+# Clone and set up a new project
+curl -fsSL https://raw.githubusercontent.com/randy-steven/go-kopi/v2/install.sh | bash -s -- init -n my-project
+
+# Or with your own git remote
+curl -fsSL https://raw.githubusercontent.com/randy-steven/go-kopi/v2/install.sh | bash -s -- init -n my-project -r https://github.com/youruser/my-project.git
+```
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/randy-steven/go-kopi.git my-project
+cd my-project
+
+# Run setup
+./install.sh setup
+
+# Change remote to your own repository
+./install.sh remote -r https://github.com/youruser/my-project.git
+```
+
+### Installer Commands
+
+| Command | Description |
+|---------|-------------|
+| `./install.sh clone -n <name>` | Clone to a new project directory |
+| `./install.sh setup` | Set up config files and install dependencies |
+| `./install.sh remote -r <url>` | Change git remote to your own repo |
+| `./install.sh pull` | Pull latest updates from upstream go-kopi |
+| `./install.sh init -n <name> -r <url>` | Full initialization (clone + setup + remote) |
+| `./install.sh help` | Show help message |
+
+### Keeping Up to Date
+
+After changing your remote, you can still pull updates from the original go-kopi:
+
+```bash
+./install.sh pull
+```
+
+This will merge the latest changes while preserving your customizations.
+
 ## Tech Stack
 
 | Category        | Technology                                      |
