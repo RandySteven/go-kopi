@@ -1,3 +1,6 @@
+// Package mysql_client provides a PostgreSQL database client wrapper with connection
+// pooling, health checks, and lifecycle management. Despite the package name,
+// it currently implements a PostgreSQL connection using the lib/pq driver.
 package mysql_client
 
 import (
@@ -12,48 +15,60 @@ import (
 	_ "github.com/lib/pq"
 )
 
-/*
-### Repositories
-<p>In repositories struct you can inject repository interface in Repositories</p>
-*/
 type (
+	// MySQL defines the interface for database operations including connection
+	// management, health checks, and migrations.
 	MySQL interface {
+		// Close closes the database connection and releases resources.
 		Close()
+		// Ping verifies the database connection is still alive.
 		Ping() error
+		// Client returns the underlying *sql.DB instance for direct access.
 		Client() *sql.DB
+		// Migration runs database migrations within the given context.
 		Migration(ctx context.Context) error
 	}
+	// mysqlClient is the internal implementation of the MySQL interface.
 	mysqlClient struct {
 		db *sql.DB
 	}
 )
 
-// Client implements [MySQL].
+// Client returns the underlying *sql.DB instance for direct database access.
 func (m *mysqlClient) Client() *sql.DB {
 	return m.db
 }
 
-// Close implements [MySQL].
+// Close closes the database connection and releases all associated resources.
 func (m *mysqlClient) Close() {
 	m.db.Close()
 }
 
-// Migration implements [MySQL].
+// Migration runs database migrations within the given context.
+// Currently returns nil as migrations are not implemented.
 func (m *mysqlClient) Migration(ctx context.Context) error {
 	return nil
 }
 
-// Ping implements [MySQL].
+// Ping verifies the database connection is still alive by sending a ping request.
 func (m *mysqlClient) Ping() error {
 	return m.db.Ping()
 }
 
+// NewMYSQLClient creates a new PostgreSQL database client with connection pooling.
+// It configures the connection with:
+//   - MaxIdleConns: 10
+//   - MaxOpenConns: 8
+//   - ConnMaxLifetime: 10 minutes
+//   - ConnMaxIdleTime: 8 minutes
+//
+// Returns an error if the connection cannot be established or ping fails.
 func NewMYSQLClient(config *config.Config) (*mysqlClient, error) {
 	conn := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=require",
-		config.Postgres.DbUser,
-		config.Postgres.DbPass,
-		config.Postgres.Host,
-		config.Postgres.DbName,
+		config.Configs.Postgres.DbUser,
+		config.Configs.Postgres.DbPass,
+		config.Configs.Postgres.Host,
+		config.Configs.Postgres.DbName,
 	)
 	log.Println(conn)
 	db, err := sql.Open("postgres", conn)

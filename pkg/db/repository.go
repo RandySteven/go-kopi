@@ -13,6 +13,7 @@ import (
 	"github.com/RandySteven/go-kopi/queries"
 )
 
+// SQL command constants for query validation.
 const (
 	selectQuery = `SELECT`
 	insertQuery = `INSERT`
@@ -20,6 +21,8 @@ const (
 	deleteQuery = `DELETE`
 )
 
+// QueryValidation validates that a query string contains the expected SQL command.
+// Returns an error if the query does not contain the specified command.
 func QueryValidation(query queries.GoQuery, command string) error {
 	queryStr := query.ToString()
 	if !strings.Contains(queryStr, command) {
@@ -28,6 +31,13 @@ func QueryValidation(query queries.GoQuery, command string) error {
 	return nil
 }
 
+// Save executes an INSERT query and returns the last inserted ID.
+// It uses prepared statements for safe query execution.
+// Type parameter T is unused but provided for consistency with other repository functions.
+//
+// Example:
+//
+//	id, err := Save[User](ctx, db, insertQuery, name, email)
 func Save[T any](ctx context.Context, db repository_interfaces.Trigger, query queries.GoQuery, requests ...any) (*uint64, error) {
 	err := QueryValidation(query, insertQuery)
 	if err != nil {
@@ -56,6 +66,14 @@ func Save[T any](ctx context.Context, db repository_interfaces.Trigger, query qu
 	return &uid, nil
 }
 
+// FindAll executes a SELECT query and returns all matching rows as a slice of pointers.
+// It uses reflection to dynamically scan row values into struct fields.
+// Type parameter T specifies the struct type to scan results into.
+// The struct fields must match the column order in the query result.
+//
+// Example:
+//
+//	users, err := FindAll[User](ctx, db, selectAllQuery)
 func FindAll[T any](ctx context.Context, db repository_interfaces.Trigger, query queries.GoQuery) (result []*T, err error) {
 	requests := new(T)
 	err = QueryValidation(query, selectQuery)
@@ -88,6 +106,8 @@ func FindAll[T any](ctx context.Context, db repository_interfaces.Trigger, query
 	return result, nil
 }
 
+// Delete removes a record from the specified table by ID.
+// Constructs and executes a DELETE query using the provided table name and ID.
 func Delete[T any](ctx context.Context, db repository_interfaces.Trigger, table string, id uint64) (err error) {
 	query := `DELETE FROM %s WHERE id = ?`
 	query = fmt.Sprintf(query, table, id)
@@ -98,6 +118,14 @@ func Delete[T any](ctx context.Context, db repository_interfaces.Trigger, table 
 	return nil
 }
 
+// FindByID executes a SELECT query to find a single record by ID.
+// The result is scanned into the provided pointer using reflection.
+// Returns sql.ErrNoRows wrapped in an error if no record is found.
+//
+// Example:
+//
+//	var user User
+//	err := FindByID[User](ctx, db, selectByIDQuery, 1, &user)
 func FindByID[T any](ctx context.Context, db repository_interfaces.Trigger, query queries.GoQuery, id uint64, result *T) error {
 	// Log query for debugging
 	log.Println("Executing query:", strings.ReplaceAll(query.ToString(), "?", fmt.Sprintf("%d", id)))
@@ -146,6 +174,8 @@ func FindByID[T any](ctx context.Context, db repository_interfaces.Trigger, quer
 	return nil
 }
 
+// Update executes an UPDATE query with the provided parameters.
+// Returns an error if the query is not a valid UPDATE statement or execution fails.
 func Update[T any](ctx context.Context, db repository_interfaces.Trigger, query queries.GoQuery, requests ...any) (err error) {
 	err = QueryValidation(query, updateQuery)
 	if err != nil {
