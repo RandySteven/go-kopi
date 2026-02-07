@@ -9,6 +9,55 @@
 
 A Go backend framework with clean architecture, supporting multiple databases, caching, and message queues.
 
+## Quick Start
+
+### Ask Barista ☕
+
+Create a new project by asking your barista to brew one:
+
+```bash
+# Brew a fresh project
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project
+
+# Or with your own git remote
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
+```
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/RandySteven/go-kopi.git my-project
+cd my-project
+
+# Run setup
+./barista setup
+
+# Change remote to your own repository
+./barista remote -r https://github.com/youruser/my-project.git
+```
+
+### Barista Commands
+
+| Command | Description |
+|---------|-------------|
+| `./barista brew -n <name>` | Brew a fresh project (clone + setup + remote) |
+| `./barista clone -n <name>` | Clone to a new project directory |
+| `./barista setup` | Set up config files and install dependencies |
+| `./barista remote -r <url>` | Change git remote to your own repo |
+| `./barista refill` | Refill with latest updates from upstream go-kopi |
+| `./barista help` | Show help message |
+
+### Keeping Up to Date
+
+After changing your remote, you can still get refills from the original go-kopi:
+
+```bash
+./barista refill
+```
+
+This will merge the latest changes while preserving your customizations.
+
 ## Tech Stack
 
 | Category        | Technology                                      |

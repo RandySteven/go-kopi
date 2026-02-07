@@ -1,3 +1,6 @@
+// Package nsq_client provides an NSQ message queue client for publishing and
+// consuming messages. NSQ is a real-time distributed messaging platform
+// designed for high-throughput, fault-tolerant message delivery.
 package nsq_client
 
 import (
@@ -11,27 +14,36 @@ import (
 )
 
 type (
+	// Nsq defines the interface for NSQ operations including publishing and consuming messages.
 	Nsq interface {
+		// Publish sends a message to the specified topic.
 		Publish(ctx context.Context, topic string, body []byte) error
+		// Consume reads a message from the specified topic.
 		Consume(ctx context.Context, topic string) (string, error)
+		// RegisterConsumer registers a handler function for a topic.
 		RegisterConsumer(topic string, handlerFunc func(context.Context, string)) error
 	}
 
+	// nsqClient is the internal implementation of the Nsq interface.
 	nsqClient struct {
 		pub     *nsq.Producer
 		config  *config.Config
 		lookupd string
 	}
 
+	// Publish defines the publish-only subset of NSQ operations.
 	Publish interface {
 		Publish(ctx context.Context, topic string, body []byte) error
 	}
 
+	// Consume defines the consume-only subset of NSQ operations.
 	Consume interface {
 		Consume(ctx context.Context, topic string) (string, error)
 	}
 )
 
+// NewNsqClient creates a new NSQ client with a producer for publishing messages.
+// Returns an error if the producer cannot be created.
 func NewNsqClient(cfg *config.Config) (*nsqClient, error) {
 	nsqConfig := nsq.NewConfig()
 
@@ -52,6 +64,11 @@ func NewNsqClient(cfg *config.Config) (*nsqClient, error) {
 	}, nil
 }
 
+// RegisterConsumer creates a new consumer for the specified topic and registers
+// a handler function to process incoming messages. Messages are processed with
+// a 30-second timeout context. Failed messages are automatically requeued.
+// The handler function receives the context (with the message body as a value)
+// and the topic name.
 func (n *nsqClient) RegisterConsumer(topic string, handlerFunc func(context.Context, string)) error {
 	nsqConfig := nsq.NewConfig()
 	log.Println("Creating NSQ consumer for topic:", topic)
