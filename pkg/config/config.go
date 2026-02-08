@@ -53,8 +53,16 @@ type (
 
 			// Temporal contains Temporal workflow orchestration settings.
 			Temporal struct {
-				HostPort  string `yaml:"hostport"`
-				Namespace string `yaml:"namespace"`
+				Host          string `yaml:"host"`
+				Port          string `yaml:"port"`
+				TaskQueue     string `yaml:"task_queue"`
+				Namespace     string `yaml:"namespace"`
+				WorkerOptions *struct {
+					MaxConcurrentActivityExecutionSize      int     `yaml:"max_concurrent_activity_execution_size"`
+					WorkerActivitiesPerSecond               float64 `yaml:"worker_activities_per_second"`
+					MaxConcurrentLocalActivityExecutionSize int     `yaml:"max_concurrent_local_activity_execution_size"`
+					WorkerLocalActivitiesPerSecond          float64 `yaml:"worker_local_activities_per_second"`
+				} `yaml:"worker_options"`
 			} `yaml:"temporal"`
 		} `yaml:"configs"`
 	}

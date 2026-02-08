@@ -1,4 +1,4 @@
-include /your/project/path/env/.env
+include ./files/env/.env
 export
 
 
@@ -65,3 +65,6 @@ endef
 
 make_model:
 	$(call create_model)
+
+gen_proto:
+	protoc --go_out=./proto --go-grpc_out=./proto --proto_path=./proto ./proto/service.proto

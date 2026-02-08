@@ -42,6 +42,7 @@ print_help() {
     echo "  setup         Set up the project (copy config files, install deps)"
     echo "  remote        Change git remote to your own repository"
     echo "  refill        Pull latest changes from upstream go-kopi"
+    echo "  gen_proto     Generate proto file"
     echo "  help          Show this help message"
     echo ""
     echo "Options:"
@@ -350,6 +351,9 @@ case $COMMAND in
         ;;
     help|"")
         print_help
+        ;;
+    gen_proto)
+        make gen_proto
         ;;
     *)
         log_error "Unknown command: $COMMAND"

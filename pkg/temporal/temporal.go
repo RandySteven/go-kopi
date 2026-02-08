@@ -1,63 +1,77 @@
-// Package temporal_client provides a Temporal workflow orchestration client wrapper.
-// Temporal is a microservice orchestration platform for running mission-critical code
-// with built-in retries, timeouts, and visibility.
 package temporal_client
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/RandySteven/go-kopi/pkg/config"
+	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 )
 
 type (
-	// WorkflowReplayer is an alias for worker.WorkflowReplayer used for replaying workflows.
-	WorkflowReplayer = worker.WorkflowReplayer
-	// ActivityRegistry is an alias for worker.ActivityRegistry used for registering activities.
-	ActivityRegistry = worker.ActivityRegistry
-)
-
-type (
-	// Worker defines the interface combining workflow replay and activity registration capabilities.
-	Worker interface {
-		WorkflowReplayer
-		ActivityRegistry
+	Workflow interface {
+		RegisterWorkflow(workflow interface{})
+		RegisterActivity(activity interface{}, activityName string)
+		ExecuteWorkflow(ctx context.Context, workflowID string, workflow interface{}, args ...interface{}) (client.WorkflowRun, error)
+		GetWorkflowRun(ctx context.Context, workflowID string, runID string) (*client.WorkflowRun, error)
 	}
 
-	// workerKopi is the internal implementation wrapping a Temporal worker.
-	workerKopi struct {
+	temporalClient struct {
 		worker worker.Worker
+		client client.Client
 	}
 )
 
-// NewWorker creates a new Temporal worker connected to the specified Temporal server.
-// It uses the hostport and namespace from the configuration, defaulting to
-// client.DefaultHostPort if not specified.
-// The worker is created for the "default" task queue.
-// Returns an error if the Temporal client connection fails.
-func NewWorker(ctx context.Context, cfg *config.Config) (*workerKopi, error) {
-	hostPort := cfg.Configs.Temporal.HostPort
-	if hostPort == "" {
-		hostPort = client.DefaultHostPort
+var _ Workflow = &temporalClient{}
+
+func (t *temporalClient) GetWorkflowRun(ctx context.Context, workflowID string, runID string) (*client.WorkflowRun, error) {
+	workflowRun := t.client.GetWorkflow(ctx, workflowID, runID)
+	if workflowRun.GetID() == "" {
+		return nil, errors.New("workflow run not found")
 	}
-	temporalClient, err := client.NewClient(client.Options{
-		HostPort:  client.DefaultHostPort,
-		Namespace: cfg.Configs.Temporal.Namespace,
+	return &workflowRun, nil
+}
+
+func (t *temporalClient) RegisterActivity(activityFn interface{}, activityName string) {
+	t.worker.RegisterActivityWithOptions(activityFn, activity.RegisterOptions{
+		Name: activityName,
+	})
+}
+
+func (t *temporalClient) RegisterWorkflow(workflow interface{}) {
+	t.worker.RegisterWorkflow(workflow)
+}
+
+func (t *temporalClient) ExecuteWorkflow(ctx context.Context, workflowID string, workflow interface{}, args ...interface{}) (client.WorkflowRun, error) {
+	return t.client.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
+		ID: workflowID,
+	}, workflow, args...)
+}
+
+func NewTemporalClient(config *config.Config) (*temporalClient, error) {
+	client, err := client.NewClient(client.Options{
+		HostPort:  fmt.Sprintf("%s:%s", config.Configs.Temporal.Host, config.Configs.Temporal.Port),
+		Namespace: config.Configs.Temporal.Namespace,
 	})
 	if err != nil {
 		return nil, err
 	}
-	defer temporalClient.Close()
 
-	worker := worker.New(temporalClient, "default", worker.Options{})
-	return &workerKopi{
-		worker: worker,
+	var workerOptions = worker.Options{}
+	if config.Configs.Temporal.WorkerOptions != nil {
+		workerOptions = worker.Options{
+			MaxConcurrentActivityExecutionSize:      config.Configs.Temporal.WorkerOptions.MaxConcurrentActivityExecutionSize,
+			WorkerActivitiesPerSecond:               config.Configs.Temporal.WorkerOptions.WorkerActivitiesPerSecond,
+			MaxConcurrentLocalActivityExecutionSize: config.Configs.Temporal.WorkerOptions.MaxConcurrentLocalActivityExecutionSize,
+			WorkerLocalActivitiesPerSecond:          config.Configs.Temporal.WorkerOptions.WorkerLocalActivitiesPerSecond,
+		}
+	}
+
+	return &temporalClient{
+		client: client,
+		worker: worker.New(client, config.Configs.Temporal.TaskQueue, workerOptions),
 	}, nil
-}
-
-// RegisterWorkflow registers a workflow function with the Temporal worker.
-// The workflow parameter should be a workflow function that follows Temporal's
-// workflow function signature requirements.
-func (w *workerKopi) RegisterWorkflow(workflow interface{}) {
 }
