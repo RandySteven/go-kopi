@@ -4,14 +4,14 @@ type ContextKey string
 
 const (
 	UserID     ContextKey = `user_id`
-	RoleID                = `role_id`
-	RequestID             = `request_id`
-	Env                   = `env`
-	ClientIP              = `client_ip`
-	FileHeader            = `file_header`
-	FileObject            = `file_object`
-	QtyCart               = `qty_cart`
-	QtyTrx                = `qty_trx`
+	RoleID     ContextKey = `role_id`
+	RequestID  ContextKey = `request_id`
+	Env        ContextKey = `env`
+	ClientIP   ContextKey = `client_ip`
+	FileHeader ContextKey = `file_header`
+	FileObject ContextKey = `file_object`
+	QtyCart    ContextKey = `qty_cart`
+	QtyTrx     ContextKey = `qty_trx`
 )
 
 func (c ContextKey) ToString() string {
