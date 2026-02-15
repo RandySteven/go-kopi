@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RandySteven/CafeConnect/be/configs"
+	"github.com/RandySteven/go-kopi/pkg/config"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
@@ -188,10 +188,10 @@ func (t *temporalClient) GetWorkflowInfo(workflowCtx workflow.Context) (*workflo
 	return info, nil
 }
 
-func NewTemporalClient(config *configs.Config) (Temporal, error) {
+func NewTemporalClient(config *config.Config) (Temporal, error) {
 	opts := client.Options{
-		HostPort:  fmt.Sprintf("%s:%s", config.Config.Temporal.Host, config.Config.Temporal.Port),
-		Namespace: config.Config.Temporal.Namespace,
+		HostPort:  fmt.Sprintf("%s:%s", config.Configs.Temporal.Host, config.Configs.Temporal.Port),
+		Namespace: config.Configs.Temporal.Namespace,
 		ConnectionOptions: client.ConnectionOptions{
 			GetSystemInfoTimeout: 15 * time.Second, // give server more time to respond (SDK default is 5s)
 		},
@@ -204,18 +204,18 @@ func NewTemporalClient(config *configs.Config) (Temporal, error) {
 	}
 
 	var workerOptions = worker.Options{}
-	if config.Config.Temporal.WorkerOptions != nil {
+	if config.Configs.Temporal.WorkerOptions != nil {
 		workerOptions = worker.Options{
-			MaxConcurrentActivityExecutionSize:      config.Config.Temporal.WorkerOptions.MaxConcurrentActivityExecutionSize,
-			WorkerActivitiesPerSecond:               config.Config.Temporal.WorkerOptions.WorkerActivitiesPerSecond,
-			MaxConcurrentLocalActivityExecutionSize: config.Config.Temporal.WorkerOptions.MaxConcurrentLocalActivityExecutionSize,
-			WorkerLocalActivitiesPerSecond:          config.Config.Temporal.WorkerOptions.WorkerLocalActivitiesPerSecond,
+			MaxConcurrentActivityExecutionSize:      config.Configs.Temporal.WorkerOptions.MaxConcurrentActivityExecutionSize,
+			WorkerActivitiesPerSecond:               config.Configs.Temporal.WorkerOptions.WorkerActivitiesPerSecond,
+			MaxConcurrentLocalActivityExecutionSize: config.Configs.Temporal.WorkerOptions.MaxConcurrentLocalActivityExecutionSize,
+			WorkerLocalActivitiesPerSecond:          config.Configs.Temporal.WorkerOptions.WorkerLocalActivitiesPerSecond,
 		}
 	}
 
-	taskQueue := config.Config.Temporal.TaskQueue
+	taskQueue := config.Configs.Temporal.TaskQueue
 	if taskQueue == "" {
-		taskQueue = "cafe_connect"
+		taskQueue = "default"
 	}
 
 	return &temporalClient{
