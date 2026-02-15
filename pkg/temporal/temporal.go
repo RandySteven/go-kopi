@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/CafeConnect/be/configs"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
@@ -16,9 +16,10 @@ import (
 
 type (
 	temporalClient struct {
-		worker    worker.Worker
-		client    client.Client
-		taskQueue string
+		worker                worker.Worker
+		client                client.Client
+		taskQueue             string
+		workflowExecutionData *WorkflowExecutionData
 	}
 
 	// StartWorkflowOptions configures how a workflow execution is started.
@@ -72,25 +73,21 @@ type (
 		Fn   interface{}
 	}
 
-	WorkflowRun interface {
-		// GetID returns the workflow ID.
-		GetID() string
-		// GetRunID returns the run ID.
-		GetRunID() string
-	}
-
-	Workflow interface {
+	Temporal interface {
 		// RegisterWorkflow registers a workflow definition with the engine.
 		RegisterWorkflow(definition WorkflowDefinition)
 
 		// RegisterActivity registers an activity definition with the engine.
 		RegisterActivity(definition ActivityDefinition)
 
+		// GetWorkflow returns a workflow execution.
+		GetWorkflowInfo(workflowCtx workflow.Context) (*workflow.Info, error)
+
 		// StartWorkflow starts a new workflow execution and returns the run ID.
 		StartWorkflow(ctx context.Context, opts StartWorkflowOptions, workflowFn interface{}, args ...interface{}) (client.WorkflowRun, error)
 
 		// SignalWorkflow sends a signal to a running workflow.
-		SignalWorkflow(ctx context.Context, workflowID string, signalName string, arg interface{}) error
+		SignalWorkflow(ctx context.Context, workflowID string, runID string, signalName string, arg interface{}) error
 
 		// QueryWorkflow queries a running workflow for its current state.
 		QueryWorkflow(ctx context.Context, workflowID string, queryType string, args ...interface{}) (interface{}, error)
@@ -106,6 +103,8 @@ type (
 
 		// Stop gracefully shuts down the worker.
 		Stop()
+
+		// AddTransitionActivity(ctx context.Context, activityName string, signalName string, activityFn interface{}, nextActivityNames ...string)
 	}
 )
 
@@ -147,8 +146,8 @@ func (t *temporalClient) StartWorkflow(ctx context.Context, opts StartWorkflowOp
 	return t.client.ExecuteWorkflow(ctx, startOpts, workflowFn, args...)
 }
 
-func (t *temporalClient) SignalWorkflow(ctx context.Context, workflowID string, signalName string, arg interface{}) error {
-	return t.client.SignalWorkflow(ctx, workflowID, "", signalName, arg)
+func (t *temporalClient) SignalWorkflow(ctx context.Context, workflowID string, runID string, signalName string, arg interface{}) error {
+	return t.client.SignalWorkflow(ctx, workflowID, runID, signalName, arg)
 }
 
 func (t *temporalClient) QueryWorkflow(ctx context.Context, workflowID string, queryType string, args ...interface{}) (interface{}, error) {
@@ -184,10 +183,15 @@ func (t *temporalClient) Stop() {
 	}
 }
 
-func NewTemporalClient(config *config.Config) (*temporalClient, error) {
+func (t *temporalClient) GetWorkflowInfo(workflowCtx workflow.Context) (*workflow.Info, error) {
+	info := workflow.GetInfo(workflowCtx)
+	return info, nil
+}
+
+func NewTemporalClient(config *configs.Config) (Temporal, error) {
 	opts := client.Options{
-		HostPort:  fmt.Sprintf("%s:%s", config.Configs.Temporal.Host, config.Configs.Temporal.Port),
-		Namespace: config.Configs.Temporal.Namespace,
+		HostPort:  fmt.Sprintf("%s:%s", config.Config.Temporal.Host, config.Config.Temporal.Port),
+		Namespace: config.Config.Temporal.Namespace,
 		ConnectionOptions: client.ConnectionOptions{
 			GetSystemInfoTimeout: 15 * time.Second, // give server more time to respond (SDK default is 5s)
 		},
@@ -200,16 +204,16 @@ func NewTemporalClient(config *config.Config) (*temporalClient, error) {
 	}
 
 	var workerOptions = worker.Options{}
-	if config.Configs.Temporal.WorkerOptions != nil {
+	if config.Config.Temporal.WorkerOptions != nil {
 		workerOptions = worker.Options{
-			MaxConcurrentActivityExecutionSize:      config.Configs.Temporal.WorkerOptions.MaxConcurrentActivityExecutionSize,
-			WorkerActivitiesPerSecond:               config.Configs.Temporal.WorkerOptions.WorkerActivitiesPerSecond,
-			MaxConcurrentLocalActivityExecutionSize: config.Configs.Temporal.WorkerOptions.MaxConcurrentLocalActivityExecutionSize,
-			WorkerLocalActivitiesPerSecond:          config.Configs.Temporal.WorkerOptions.WorkerLocalActivitiesPerSecond,
+			MaxConcurrentActivityExecutionSize:      config.Config.Temporal.WorkerOptions.MaxConcurrentActivityExecutionSize,
+			WorkerActivitiesPerSecond:               config.Config.Temporal.WorkerOptions.WorkerActivitiesPerSecond,
+			MaxConcurrentLocalActivityExecutionSize: config.Config.Temporal.WorkerOptions.MaxConcurrentLocalActivityExecutionSize,
+			WorkerLocalActivitiesPerSecond:          config.Config.Temporal.WorkerOptions.WorkerLocalActivitiesPerSecond,
 		}
 	}
 
-	taskQueue := config.Configs.Temporal.TaskQueue
+	taskQueue := config.Config.Temporal.TaskQueue
 	if taskQueue == "" {
 		taskQueue = "cafe_connect"
 	}
