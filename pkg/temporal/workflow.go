@@ -79,6 +79,10 @@ type (
 		// GetWorkflowResult gets the workflow result from the Temporal server.
 		// It is used to get the workflow result from the Temporal server.
 		GetWorkflowResult(ctx context.Context, workflowID string, runID string, result interface{}) error
+
+		// StartChildWorkflow starts a new child workflow execution and returns the run ID.
+		// It is used to start a new child workflow execution and returns the run ID.
+		StartChildWorkflow(ctx workflow.Context, workflowID string, signalName string, request interface{}, result interface{}) error
 	}
 )
 
@@ -233,6 +237,29 @@ func (w *WorkflowExecutionData) AddTransitionActivityWithOptions(activityName st
 		SignalName:      signalName,
 		ActivityOptions: options,
 	})
+}
+
+func (w *WorkflowExecutionData) StartChildWorkflow(ctx workflow.Context, workflowID string, signalName string, request interface{}, result interface{}) error {
+	childCtx := workflow.WithChildOptions(ctx, workflow.ChildWorkflowOptions{
+		WorkflowID: workflowID,
+	})
+
+	childWorkflowRun := workflow.ExecuteChildWorkflow(childCtx, signalName)
+	var workflowExecution workflow.Execution
+	if err := childWorkflowRun.GetChildWorkflowExecution().Get(ctx, &workflowExecution); err != nil {
+		return fmt.Errorf("failed to get child workflow execution: %w", err)
+	}
+
+	sigFuture := workflow.SignalExternalWorkflow(ctx, workflowExecution.ID, workflowExecution.RunID, signalName, request)
+	if err := sigFuture.Get(ctx, nil); err != nil {
+		return fmt.Errorf("failed to signal child workflow: %w", err)
+	}
+
+	if err := childWorkflowRun.Get(childCtx, result); err != nil {
+		return fmt.Errorf("failed to get child workflow result: %w", err)
+	}
+
+	return nil
 }
 
 // NewWorkflowExecution creates a new WorkflowExecution.
