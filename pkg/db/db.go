@@ -44,12 +44,6 @@ func (m *mysqlClient) Close() {
 	m.db.Close()
 }
 
-// Migration runs database migrations within the given context.
-// Currently returns nil as migrations are not implemented.
-func (m *mysqlClient) Migration(ctx context.Context) error {
-	return nil
-}
-
 // Ping verifies the database connection is still alive by sending a ping request.
 func (m *mysqlClient) Ping() error {
 	return m.db.Ping()
