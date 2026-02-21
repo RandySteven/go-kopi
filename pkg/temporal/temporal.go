@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/temporal"
@@ -188,7 +188,7 @@ func (t *temporalClient) GetWorkflowInfo(workflowCtx workflow.Context) (*workflo
 	return info, nil
 }
 
-func NewTemporalClient(config *config.Config) (Temporal, error) {
+func NewTemporalClient(config *configs.Config) (Temporal, error) {
 	opts := client.Options{
 		HostPort:  fmt.Sprintf("%s:%s", config.Configs.Temporal.Host, config.Configs.Temporal.Port),
 		Namespace: config.Configs.Temporal.Namespace,

@@ -6,7 +6,7 @@ import (
 	"github.com/RandySteven/go-kopi/caches"
 	"github.com/RandySteven/go-kopi/handlers/consumers"
 	api_http "github.com/RandySteven/go-kopi/handlers/https"
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	mysql_client "github.com/RandySteven/go-kopi/pkg/db"
 	nsq_client "github.com/RandySteven/go-kopi/pkg/nsq"
 	redis_client "github.com/RandySteven/go-kopi/pkg/redis"
@@ -25,7 +25,7 @@ type (
 	}
 )
 
-func NewApp(config *config.Config) (*App, error) {
+func NewApp(config *configs.Config) (*App, error) {
 	mysqlClient, err := mysql_client.NewMYSQLClient(config)
 	if err != nil {
 		return nil, err

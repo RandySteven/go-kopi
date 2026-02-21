@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/RandySteven/go-kopi/apps"
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	"github.com/joho/godotenv"
 )
 
@@ -18,13 +18,13 @@ func init() {
 }
 
 func main() {
-	configPath, err := config.ParseFlags()
+	configPath, err := configs.ParseFlags()
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
 
-	config, err := config.NewConfig(configPath)
+	config, err := configs.NewConfig(configPath)
 	if err != nil {
 		log.Fatalln(err)
 		return

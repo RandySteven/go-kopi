@@ -1,7 +1,7 @@
 // Package config provides configuration management for the application.
 // It handles loading, parsing, and accessing configuration values from YAML files
 // and supports server, database (PostgreSQL, MongoDB), Redis, NSQ, and Temporal settings.
-package config
+package configs
 
 import "time"
 

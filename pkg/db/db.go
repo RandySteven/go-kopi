@@ -10,7 +10,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	_ "github.com/jackc/pgx/v5"
 	_ "github.com/lib/pq"
 )
@@ -57,7 +57,7 @@ func (m *mysqlClient) Ping() error {
 //   - ConnMaxIdleTime: 8 minutes
 //
 // Returns an error if the connection cannot be established or ping fails.
-func NewMYSQLClient(config *config.Config) (*mysqlClient, error) {
+func NewMYSQLClient(config *configs.Config) (*mysqlClient, error) {
 	conn := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=require",
 		config.Configs.Postgres.DbUser,
 		config.Configs.Postgres.DbPass,
