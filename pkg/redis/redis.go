@@ -12,7 +12,7 @@ import (
 	"strconv"
 
 	"github.com/RandySteven/go-kopi/enums"
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
 )
@@ -46,7 +46,7 @@ type (
 // NewRedisClient creates a new Redis client with rate limiting support.
 // It connects to Redis using the host and port from the provided configuration.
 // Returns an error if the connection cannot be established.
-func NewRedisClient(config *config.Config) (*redisClient, error) {
+func NewRedisClient(config *configs.Config) (*redisClient, error) {
 	redisCfg := config.Configs.Redis
 	addr := fmt.Sprintf("%s:%s", redisCfg.Host, redisCfg.Port)
 	log.Println("connecting to redis : ", addr)

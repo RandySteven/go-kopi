@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RandySteven/go-kopi/pkg/config"
+	"github.com/RandySteven/go-kopi/configs"
 	"github.com/nsqio/go-nsq"
 )
 
@@ -27,7 +27,7 @@ type (
 	// nsqClient is the internal implementation of the Nsq interface.
 	nsqClient struct {
 		pub     *nsq.Producer
-		config  *config.Config
+		config  *configs.Config
 		lookupd string
 	}
 
@@ -44,7 +44,7 @@ type (
 
 // NewNsqClient creates a new NSQ client with a producer for publishing messages.
 // Returns an error if the producer cannot be created.
-func NewNsqClient(cfg *config.Config) (*nsqClient, error) {
+func NewNsqClient(cfg *configs.Config) (*nsqClient, error) {
 	nsqConfig := nsq.NewConfig()
 
 	// addr := fmt.Sprintf("%s:%s", cfg.Config.Nsq.NSQDHost, cfg.Config.Nsq.NSQDTCPPort)
