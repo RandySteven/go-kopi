@@ -103,8 +103,6 @@ type (
 
 		// Stop gracefully shuts down the worker.
 		Stop()
-
-		// AddTransitionActivity(ctx context.Context, activityName string, signalName string, activityFn interface{}, nextActivityNames ...string)
 	}
 )
 
