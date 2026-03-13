@@ -28,3 +28,4 @@ go get gopkg.in/gomail.v2
 go get -u github.com/nsqio/go-nsq
 go get -u go.temporal.io/sdk
 go get -u go.temporal.io/sdk/client
+go get -u github.com/minio/minio-go/v7

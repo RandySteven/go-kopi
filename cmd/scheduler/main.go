@@ -37,9 +37,5 @@ func main() {
 		return
 	}
 
-	if err = app.ExecuteMigration(ctx); err != nil {
-		log.Fatalln(`Error executing migration `, err)
-		return
-	}
-
+	app.PrepareJobScheduler(ctx)
 }

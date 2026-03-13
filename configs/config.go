@@ -1,7 +1,7 @@
 // Package config provides configuration management for the application.
 // It handles loading, parsing, and accessing configuration values from YAML files
 // and supports server, database (PostgreSQL, MongoDB), Redis, NSQ, and Temporal settings.
-package config
+package configs
 
 import "time"
 
@@ -49,12 +49,27 @@ type (
 
 			// NSQ contains NSQ message queue settings.
 			NSQ struct {
+				Host            string        `yaml:"host"`
+				Port            string        `yaml:"port"`
+				Topic           string        `yaml:"topic"`
+				Channel         string        `yaml:"channel"`
+				MaxInFlight     int           `yaml:"maxInFlight"`
+				MaxRequeueDelay time.Duration `yaml:"maxRequeueDelay"`
+				MaxRequeueCount int           `yaml:"maxRequeueCount"`
 			} `yaml:"nsq"`
 
 			// Temporal contains Temporal workflow orchestration settings.
 			Temporal struct {
-				HostPort  string `yaml:"hostport"`
-				Namespace string `yaml:"namespace"`
+				Host          string `yaml:"host"`
+				Port          string `yaml:"port"`
+				TaskQueue     string `yaml:"task_queue"`
+				Namespace     string `yaml:"namespace"`
+				WorkerOptions *struct {
+					MaxConcurrentActivityExecutionSize      int     `yaml:"maxConcurrentActivityExecutionSize"`
+					WorkerActivitiesPerSecond               float64 `yaml:"workerActivitiesPerSecond"`
+					MaxConcurrentLocalActivityExecutionSize int     `yaml:"maxConcurrentLocalActivityExecutionSize"`
+					WorkerLocalActivitiesPerSecond          float64 `yaml:"workerLocalActivitiesPerSecond"`
+				} `yaml:"workerOptions"`
 			} `yaml:"temporal"`
 		} `yaml:"configs"`
 	}

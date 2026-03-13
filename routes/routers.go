@@ -15,7 +15,7 @@ import (
 	"net/http"
 
 	"github.com/RandySteven/go-kopi/enums"
-	api_http "github.com/RandySteven/go-kopi/handlers/https"
+	rest_handler "github.com/RandySteven/go-kopi/handlers/rests"
 	"github.com/RandySteven/go-kopi/middlewares"
 	"github.com/gorilla/mux"
 )
@@ -77,7 +77,7 @@ type (
 //	    Put("UpdateUser", "/{id}", api.UserHTTP.UpdateUser, enums.AuthenticationMiddleware),
 //	    Delete("DeleteUser", "/{id}", api.UserHTTP.DeleteUser, enums.AuthenticationMiddleware),
 //	}
-func NewEndpointRouters(api *api_http.HTTPs) RouterPrefix {
+func NewEndpointRouters(api *rest_handler.Rests) RouterPrefix {
 	endpointRouters := make(RouterPrefix)
 
 	// ============================================================
@@ -87,8 +87,8 @@ func NewEndpointRouters(api *api_http.HTTPs) RouterPrefix {
 	// POST /auth/login    - Authenticate user and get token
 	// ============================================================
 	endpointRouters[enums.AuthPrefix] = []*Router{
-		Post("RegisterUser", "/register", api.UserHTTP.RegisterUser),
-		Post("LoginUser", "/login", api.UserHTTP.LoginUser),
+		Post("RegisterUser", "/register", api.UserRest.RegisterUser),
+		Post("LoginUser", "/login", api.UserRest.LoginUser),
 	}
 
 	return endpointRouters
