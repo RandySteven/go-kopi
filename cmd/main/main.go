@@ -1,47 +1,65 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/RandySteven/go-kopi/apps"
+	"github.com/RandySteven/go-kopi/configs"
+	"github.com/RandySteven/go-kopi/routes"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func init() {
-	log.Println("  ________                  ____  __.            .__ ")
-	log.Println(" /  _____/  ____           |    |/ _|____ ______ |__|")
-	log.Println("/   \\  ___ /  _ \\   ______ |      < /  _ \\____ \\|  |")
-	log.Println("\\    \\_\\  (  <_> ) /_____/ |    |  (  <_> )  |_> >  |")
-	log.Println(" \\______  /\\____/          |____|__ \\____/|   __/|__|")
-	log.Println("        \\/                         \\/     |__|        ")
+	err := godotenv.Load("./files/env/.env")
+	if err != nil {
+		log.Fatalln(`failed to load .env `, err)
+		return
+	}
 }
 
 func main() {
-	// configPath, err := config.ParseFlags()
+	configPath, err := configs.ParseFlags()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	config, err := configs.NewConfig(configPath)
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	ctx := context.TODO()
 
-	// config, err := config.NewConfig(configPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	app, err := apps.NewApp(config)
+	if err != nil {
+		log.Fatalln(`Error starting app `, err)
+		return
+	}
 
-	// repositories, err := db.NewRepositories(config)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	apis := app.PrepareHttpHandler(ctx)
+	r := mux.NewRouter()
+	router := routes.NewEndpointRouters(apis)
+	routes.InitRouter(router, r)
 
-	// usecases := usecases.NewUsecases()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	if err = app.Temporal.Start(); err != nil {
+		log.Fatalln("Failed to start Temporal worker:", err)
+		return
+	}
+	defer app.Temporal.Stop()
 
-	// apiHttp := api_http.NewHTTPs(usecases)
+	go config.Run(r)
 
-	// r := mux.NewRouter()
-	// routes.InitRouter(apiHttp, r)
-	// config.Run(r)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err = app.RefreshRedis(ctx); err != nil {
+		log.Fatal(err)
+		return
+	}
 }
