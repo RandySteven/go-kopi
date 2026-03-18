@@ -49,6 +49,13 @@ type (
 
 			// NSQ contains NSQ message queue settings.
 			NSQ struct {
+				Host            string        `yaml:"host"`
+				Port            string        `yaml:"port"`
+				Topic           string        `yaml:"topic"`
+				Channel         string        `yaml:"channel"`
+				MaxInFlight     int           `yaml:"maxInFlight"`
+				MaxRequeueDelay time.Duration `yaml:"maxRequeueDelay"`
+				MaxRequeueCount int           `yaml:"maxRequeueCount"`
 			} `yaml:"nsq"`
 
 			// Temporal contains Temporal workflow orchestration settings.
@@ -58,11 +65,11 @@ type (
 				TaskQueue     string `yaml:"task_queue"`
 				Namespace     string `yaml:"namespace"`
 				WorkerOptions *struct {
-					MaxConcurrentActivityExecutionSize      int     `yaml:"max_concurrent_activity_execution_size"`
-					WorkerActivitiesPerSecond               float64 `yaml:"worker_activities_per_second"`
-					MaxConcurrentLocalActivityExecutionSize int     `yaml:"max_concurrent_local_activity_execution_size"`
-					WorkerLocalActivitiesPerSecond          float64 `yaml:"worker_local_activities_per_second"`
-				} `yaml:"worker_options"`
+					MaxConcurrentActivityExecutionSize      int     `yaml:"maxConcurrentActivityExecutionSize"`
+					WorkerActivitiesPerSecond               float64 `yaml:"workerActivitiesPerSecond"`
+					MaxConcurrentLocalActivityExecutionSize int     `yaml:"maxConcurrentLocalActivityExecutionSize"`
+					WorkerLocalActivitiesPerSecond          float64 `yaml:"workerLocalActivitiesPerSecond"`
+				} `yaml:"workerOptions"`
 			} `yaml:"temporal"`
 		} `yaml:"configs"`
 	}

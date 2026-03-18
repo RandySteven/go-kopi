@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/RandySteven/go-kopi/caches"
-	"github.com/RandySteven/go-kopi/handlers/consumers"
-	api_http "github.com/RandySteven/go-kopi/handlers/https"
 	"github.com/RandySteven/go-kopi/configs"
+	"github.com/RandySteven/go-kopi/handlers/consumers"
+	rest_handler "github.com/RandySteven/go-kopi/handlers/rests"
 	mysql_client "github.com/RandySteven/go-kopi/pkg/db"
 	nsq_client "github.com/RandySteven/go-kopi/pkg/nsq"
 	redis_client "github.com/RandySteven/go-kopi/pkg/redis"
@@ -50,11 +50,11 @@ func NewApp(config *configs.Config) (*App, error) {
 	}, nil
 }
 
-func (a *App) PrepareHttpHandler(ctx context.Context) *api_http.HTTPs {
+func (a *App) PrepareHttpHandler(ctx context.Context) *rest_handler.Rests {
 	repositories := repositories.NewRepositories(a.MySQL.Client())
 	caches := caches.NewCaches(a.Redis.Client())
 	usecases := usecases.NewUsecases(repositories, caches, a.Nsq, a.Temporal)
-	return api_http.NewHTTPs(usecases)
+	return rest_handler.NewRests(usecases)
 }
 
 func (a *App) RefreshRedis(ctx context.Context) error {
@@ -62,6 +62,7 @@ func (a *App) RefreshRedis(ctx context.Context) error {
 }
 
 func (a *App) PrepareJobScheduler(ctx context.Context) {
+
 }
 
 func (a *App) PrepareConsumer(ctx context.Context) *consumers.Consumers {
