@@ -11,6 +11,11 @@ import (
 )
 
 type (
+	SignalName   string
+	ActivityName string
+)
+
+type (
 	// Navigable allows the Execute state machine to read which activity
 	// should run next. Any state struct that implements this interface
 	// enables branching in the pipeline.
@@ -39,15 +44,15 @@ type (
 	}
 
 	WorkflowExecutionData struct {
-		ID            uint64
-		WorkflowID    string
-		RunID         string
+		ID         uint64
+		WorkflowID string
+		RunID      string
 
 		activity      map[string]*ActivityExecutionInfo
 		firstActivity string
 		StartedAt     time.Time
 
-		CompletedAt   time.Time
+		CompletedAt time.Time
 
 		temporalClient Temporal
 	}
@@ -89,8 +94,42 @@ type (
 		//GetSignalResult gets the signal result from the Temporal server.
 		//It is used to get the signal result from the Temporal server.
 		GetSignalResult(ctx workflow.Context, signalName string, result interface{}) error
+
+		//SignalExternalWorkflow signals an external workflow.
+		//It is used to signal an external workflow.
+		SignalExternalWorkflow(ctx workflow.Context, workflowID string, runID string, signalName string, arg interface{}) error
+
+		//GetExternalWorkflowResult gets the external workflow result from the Temporal server.
+		//It is used to get the external workflow result from the Temporal server.
+		GetExternalWorkflowResult(ctx workflow.Context, workflowID string, runID string, result interface{}) error
+
+		//WaitForSignal waits for a signal and returns the result.
+		//It is used to wait for a signal and returns the result.
+		WaitForSignal(ctx workflow.Context, signalName string, result interface{}, timeout time.Duration) error
+
+		//ListenSignal listens for a signal and calls the handler function when the signal is received.
+		//It is used to listen for a signal and call the handler function when the signal is received.
+		ListenSignal(ctx workflow.Context, signalName string, result interface{}, handler func(ctx workflow.Context)) error
+
+		//WaitForAnySignal waits for any signal from the given map of signals and returns the signal name.
+		//It is used to wait for any signal from the given map of signals and returns the signal name.
+		WaitForAnySignal(ctx workflow.Context, signals map[string]interface{}) (string, error)
 	}
 )
+
+// GetExternalWorkflowResult implements [WorkflowExecution].
+func (w *WorkflowExecutionData) GetExternalWorkflowResult(ctx workflow.Context, workflowID string, runID string, result interface{}) error {
+	return nil
+}
+
+// SignalExternalWorkflow implements [WorkflowExecution].
+func (w *WorkflowExecutionData) SignalExternalWorkflow(ctx workflow.Context, workflowID string, runID string, signalName string, arg interface{}) error {
+	sigFuture := workflow.SignalExternalWorkflow(ctx, workflowID, runID, signalName, arg)
+	if err := sigFuture.Get(ctx, nil); err != nil {
+		return fmt.Errorf("failed to signal external workflow: %w", err)
+	}
+	return nil
+}
 
 // Execute runs the sequential activity pipeline, threading state through each activity.
 // If the state implements Navigable and an activity sets NextActivity, Execute branches
@@ -261,6 +300,45 @@ func (w *WorkflowExecutionData) GetSignalResult(ctx workflow.Context, signalName
 	resultSelector.Select(ctx)
 
 	return nil
+}
+
+func (w *WorkflowExecutionData) WaitForSignal(ctx workflow.Context, signalName string, result interface{}, timeout time.Duration) error {
+	signalChan := workflow.GetSignalChannel(ctx, signalName)
+
+	timedOut, _ := workflow.AwaitWithTimeout(ctx, timeout, func() bool {
+		return signalChan.ReceiveAsync(result)
+	})
+
+	if timedOut {
+		return fmt.Errorf("signal %s timed out", signalName)
+	}
+
+	return nil
+}
+
+func (w *WorkflowExecutionData) ListenSignal(ctx workflow.Context, signalName string, result interface{}, handler func(ctx workflow.Context)) error {
+	workflow.Go(ctx, func(ctx workflow.Context) {
+		signalChan := workflow.GetSignalChannel(ctx, signalName)
+		for {
+			signalChan.Receive(ctx, result)
+			handler(ctx)
+		}
+	})
+	return nil
+}
+
+func (w *WorkflowExecutionData) WaitForAnySignal(ctx workflow.Context, signals map[string]interface{}) (string, error) {
+	selector := workflow.NewSelector(ctx)
+	received := ""
+	for signalName, result := range signals {
+		signalChan := workflow.GetSignalChannel(ctx, signalName)
+		selector.AddReceive(signalChan, func(c workflow.ReceiveChannel, more bool) {
+			c.Receive(ctx, result)
+			received = signalName
+		})
+	}
+	selector.Select(ctx)
+	return received, nil
 }
 
 // NewWorkflowExecution creates a new WorkflowExecution.
