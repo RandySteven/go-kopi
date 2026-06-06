@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/RandySteven/go-kopi/enums"
-	redis_client "github.com/RandySteven/go-kopi/pkg/redis"
+	redis_client "github.com/RandySteven/go-cook/redis"
 	"github.com/RandySteven/go-kopi/utils"
 	ip "github.com/vikram1565/request-ip"
 )

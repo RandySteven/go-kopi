@@ -1,4 +1,4 @@
-package job_interfaces
+package jobs
 
 import "context"
 

@@ -5,26 +5,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/RandySteven/go-kopi/caches"
-	nsq_client "github.com/RandySteven/go-kopi/pkg/nsq"
-	"github.com/RandySteven/go-kopi/repositories"
-	"github.com/RandySteven/go-kopi/topics"
+	nsq_client "github.com/RandySteven/go-cook/nsq"
 )
 
 type (
-	Consumers struct {
-		//DummyConsumer       consumer_interfaces.DummyConsumer
-	}
-
-	ConsumerFunc func(ctx context.Context) error
-
-	RunConsumer map[string]ConsumerFunc
-
 	Runners struct {
 		nsq          nsq_client.Nsq
 		ConsumerFunc []ConsumerFunc
 		RunConsumers RunConsumer
 	}
+
+	ConsumerFunc func(ctx context.Context) error
 )
 
 func InitRunner(nsq nsq_client.Nsq) *Runners {
@@ -32,11 +23,6 @@ func InitRunner(nsq nsq_client.Nsq) *Runners {
 		nsq:          nsq,
 		RunConsumers: make(map[string]ConsumerFunc),
 	}
-}
-
-func (r *Runners) RegisterConsumer(topic string, fun ConsumerFunc) *Runners {
-	r.RunConsumers[topic] = fun
-	return r
 }
 
 func (r *Runners) Run(ctx context.Context) error {
@@ -69,12 +55,4 @@ func (r *Runners) Run(ctx context.Context) error {
 		return nil
 	}
 
-}
-
-func NewConsumers(
-	repo *repositories.Repositories,
-	cache *caches.Caches,
-	topics *topics.Topics,
-) *Consumers {
-	return &Consumers{}
 }

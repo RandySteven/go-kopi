@@ -3,14 +3,23 @@ package repositories
 import (
 	"context"
 
+	mysql_client "github.com/RandySteven/go-cook/db"
+	repository_interfaces "github.com/RandySteven/go-cook/db"
 	"github.com/RandySteven/go-kopi/entities/models"
-	repository_interfaces "github.com/RandySteven/go-kopi/interfaces/repositories"
-	mysql_client "github.com/RandySteven/go-kopi/pkg/db"
 )
 
-type userRepository struct {
-	dbx repository_interfaces.DBX
-}
+type (
+	UserRepository interface {
+		repository_interfaces.Saver[models.User]
+		repository_interfaces.Finder[models.User]
+		repository_interfaces.Updater[models.User]
+		repository_interfaces.Deleter[models.User]
+	}
+
+	userRepository struct {
+		dbx repository_interfaces.DBX
+	}
+)
 
 func (u *userRepository) Save(ctx context.Context, entity *models.User) (result *models.User, err error) {
 	id, err := mysql_client.Save[models.User](ctx, u.dbx(ctx), ``, entity)
@@ -54,4 +63,4 @@ func newUserRepository(dbx repository_interfaces.DBX) *userRepository {
 	}
 }
 
-var _ repository_interfaces.UserRepository = &userRepository{}
+var _ UserRepository = &userRepository{}

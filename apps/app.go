@@ -5,12 +5,12 @@ import (
 
 	"github.com/RandySteven/go-kopi/caches"
 	"github.com/RandySteven/go-kopi/configs"
-	"github.com/RandySteven/go-kopi/handlers/consumers"
-	rest_handler "github.com/RandySteven/go-kopi/handlers/rests"
-	mysql_client "github.com/RandySteven/go-kopi/pkg/db"
-	nsq_client "github.com/RandySteven/go-kopi/pkg/nsq"
-	redis_client "github.com/RandySteven/go-kopi/pkg/redis"
-	temporal_client "github.com/RandySteven/go-kopi/pkg/temporal"
+	"github.com/RandySteven/go-kopi/consumers"
+	rest_handler "github.com/RandySteven/go-kopi/handlers"
+	mysql_client "github.com/RandySteven/go-cook/db"
+	nsq_client "github.com/RandySteven/go-cook/nsq"
+	redis_client "github.com/RandySteven/go-cook/redis"
+	temporal_client "github.com/RandySteven/go-cook/temporal"
 	"github.com/RandySteven/go-kopi/repositories"
 	"github.com/RandySteven/go-kopi/topics"
 	"github.com/RandySteven/go-kopi/usecases"
@@ -26,19 +26,26 @@ type (
 )
 
 func NewApp(config *configs.Config) (*App, error) {
-	mysqlClient, err := mysql_client.NewMYSQLClient(config)
+	mysqlClient, err := mysql_client.NewMYSQLClient(&mysql_client.PostgresConfig{
+		DbUser: config.Configs.Postgres.Host,
+		DbPass: config.Configs.Postgres.DbPass,
+		DbHost: config.Configs.Server.Host,
+		DbName: config.Configs.Postgres.DbName,
+	})
 	if err != nil {
 		return nil, err
 	}
-	nsqClient, err := nsq_client.NewNsqClient(config)
+	nsqClient, err := nsq_client.NewNsqClient(&nsq_client.NSQConfig{})
 	if err != nil {
 		return nil, err
 	}
-	redisClient, err := redis_client.NewRedisClient(config)
+	redisClient, err := redis_client.NewRedisClient(&redis_client.RedisConfig{
+		
+	})
 	if err != nil {
 		return nil, err
 	}
-	temporalClient, err := temporal_client.NewTemporalClient(config)
+	temporalClient, err := temporal_client.NewTemporalClient(&temporal_client.TemporalConfig{})
 	if err != nil {
 		return nil, err
 	}
@@ -50,11 +57,11 @@ func NewApp(config *configs.Config) (*App, error) {
 	}, nil
 }
 
-func (a *App) PrepareHttpHandler(ctx context.Context) *rest_handler.Rests {
+func (a *App) PrepareHttpHandler(ctx context.Context) *rest_handler.Handlers {
 	repositories := repositories.NewRepositories(a.MySQL.Client())
 	caches := caches.NewCaches(a.Redis.Client())
 	usecases := usecases.NewUsecases(repositories, caches, a.Nsq, a.Temporal)
-	return rest_handler.NewRests(usecases)
+	return rest_handler.NewHandlers(usecases)
 }
 
 func (a *App) RefreshRedis(ctx context.Context) error {
@@ -75,7 +82,8 @@ func (a *App) PrepareConsumer(ctx context.Context) *consumers.Consumers {
 
 func (a *App) ExecuteMigration(ctx context.Context) error {
 	defer a.MySQL.Close()
-	if err := a.MySQL.Migration(ctx); err != nil {
+	migrationWorker := mysql_client.MigrationWorker{}
+	if err := migrationWorker.Migration(ctx); err != nil {
 		return err
 	}
 	return nil

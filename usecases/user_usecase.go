@@ -6,10 +6,16 @@ import (
 	"github.com/RandySteven/go-kopi/apperror"
 	"github.com/RandySteven/go-kopi/entities/payloads/requests"
 	"github.com/RandySteven/go-kopi/entities/payloads/responses"
-	usecases_interfaces "github.com/RandySteven/go-kopi/interfaces/usecases"
 )
 
-type userUsecase struct{}
+type (
+	UserUsecase interface {
+		RegisterUser(ctx context.Context, request *requests.UserRegisterRequest) (response *responses.UserRegisterResponse, appError apperror.CustomError)
+		LoginUser(ctx context.Context, request *requests.UserLoginRequest) (response *responses.UserLoginResponse, appError apperror.CustomError)
+	}
+
+	userUsecase struct{}
+)
 
 func (u *userUsecase) RegisterUser(ctx context.Context, request *requests.UserRegisterRequest) (response *responses.UserRegisterResponse, appError apperror.CustomError) {
 	return
@@ -19,4 +25,4 @@ func (u *userUsecase) LoginUser(ctx context.Context, request *requests.UserLogin
 	return
 }
 
-var _ usecases_interfaces.UserUsecase = &userUsecase{}
+var _ UserUsecase = &userUsecase{}

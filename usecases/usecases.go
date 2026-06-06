@@ -2,14 +2,13 @@ package usecases
 
 import (
 	"github.com/RandySteven/go-kopi/caches"
-	usecases_interfaces "github.com/RandySteven/go-kopi/interfaces/usecases"
-	nsq_client "github.com/RandySteven/go-kopi/pkg/nsq"
-	temporal_client "github.com/RandySteven/go-kopi/pkg/temporal"
+	nsq_client "github.com/RandySteven/go-cook/nsq"
+	temporal_client "github.com/RandySteven/go-cook/temporal"
 	"github.com/RandySteven/go-kopi/repositories"
 )
 
 type Usecases struct {
-	UserUsecase usecases_interfaces.UserUsecase
+	UserUsecase UserUsecase
 }
 
 func NewUsecases(repositories *repositories.Repositories,
