@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/RandySteven/go-kopi/enums"
-	jwt_client "github.com/RandySteven/go-cook/jwt"
+	jwt_client "github.com/RandySteven/go-cook/security"
 	"github.com/RandySteven/go-kopi/utils"
 	"github.com/golang-jwt/jwt/v5"
 )

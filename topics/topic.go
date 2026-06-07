@@ -7,11 +7,13 @@ import (
 )
 
 type (
+	//List of interface method to register topic
 	Topic interface {
 		WriteMessage(ctx context.Context, value string) (err error)
 		ReadMessage(ctx context.Context) (value string, err error)
 	}
 
+	//Register topics here
 	Topics struct {
 	}
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/RandySteven/go-kopi/configs"
 	"github.com/RandySteven/go-kopi/consumers"
 	rest_handler "github.com/RandySteven/go-kopi/handlers"
-	mysql_client "github.com/RandySteven/go-cook/db"
+	db_client "github.com/RandySteven/go-cook/db"
 	nsq_client "github.com/RandySteven/go-cook/nsq"
 	redis_client "github.com/RandySteven/go-cook/redis"
 	temporal_client "github.com/RandySteven/go-cook/temporal"
@@ -18,7 +18,7 @@ import (
 
 type (
 	App struct {
-		MySQL    mysql_client.MySQL
+		MySQL    db_client.DBClient
 		Redis    redis_client.Redis
 		Temporal temporal_client.Temporal
 		Nsq      nsq_client.Nsq
@@ -26,7 +26,7 @@ type (
 )
 
 func NewApp(config *configs.Config) (*App, error) {
-	mysqlClient, err := mysql_client.NewMYSQLClient(&mysql_client.PostgresConfig{
+	mysqlClient, err := db_client.NewMYSQLClient(&db_client.DBConfig{
 		DbUser: config.Configs.Postgres.Host,
 		DbPass: config.Configs.Postgres.DbPass,
 		DbHost: config.Configs.Server.Host,
@@ -82,7 +82,7 @@ func (a *App) PrepareConsumer(ctx context.Context) *consumers.Consumers {
 
 func (a *App) ExecuteMigration(ctx context.Context) error {
 	defer a.MySQL.Close()
-	migrationWorker := mysql_client.MigrationWorker{}
+	migrationWorker := db_client.MigrationWorker{}
 	if err := migrationWorker.Migration(ctx); err != nil {
 		return err
 	}
