@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Default values
 REPO_URL="https://github.com/RandySteven/go-kopi.git"
-DEFAULT_BRANCH="v3"
+DEFAULT_BRANCH="v3.0"
 
 print_banner() {
     echo -e "${CYAN}"
