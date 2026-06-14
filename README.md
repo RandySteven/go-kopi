@@ -17,10 +17,10 @@ Create a new project by asking your barista to brew one:
 
 ```bash
 # Brew a fresh project
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3/barista | bash -s -- brew -n my-project
 
 # Or with your own git remote
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v2/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
 ```
 
 ### Manual Installation
@@ -73,6 +73,7 @@ This will merge the latest changes while preserving your customizations.
 | Logging         | Logrus |
 | Scheduler       | Cron (robfig/cron) |
 | Infrastructure  | [go-cook](https://github.com/RandySteven/go-cook) (DB, Redis, NSQ, Temporal clients) |
+| AWS             | [go-baker](https://github.com/RandySteven/go-baker) (S3, DynamoDB) |
 
 ## Architecture
 
