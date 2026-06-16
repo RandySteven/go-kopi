@@ -3,14 +3,14 @@ package apps
 import (
 	"context"
 
-	"github.com/RandySteven/go-kopi/caches"
-	"github.com/RandySteven/go-kopi/configs"
-	"github.com/RandySteven/go-kopi/consumers"
-	rest_handler "github.com/RandySteven/go-kopi/handlers"
 	db_client "github.com/RandySteven/go-cook/db"
 	nsq_client "github.com/RandySteven/go-cook/nsq"
 	redis_client "github.com/RandySteven/go-cook/redis"
 	temporal_client "github.com/RandySteven/go-cook/temporal"
+	"github.com/RandySteven/go-kopi/caches"
+	"github.com/RandySteven/go-kopi/configs"
+	"github.com/RandySteven/go-kopi/consumers"
+	rest_handler "github.com/RandySteven/go-kopi/handlers"
 	"github.com/RandySteven/go-kopi/repositories"
 	"github.com/RandySteven/go-kopi/topics"
 	"github.com/RandySteven/go-kopi/usecases"
@@ -26,26 +26,19 @@ type (
 )
 
 func NewApp(config *configs.Config) (*App, error) {
-	mysqlClient, err := db_client.NewMYSQLClient(&db_client.DBConfig{
-		DbUser: config.Configs.Postgres.Host,
-		DbPass: config.Configs.Postgres.DbPass,
-		DbHost: config.Configs.Server.Host,
-		DbName: config.Configs.Postgres.DbName,
-	})
+	mysqlClient, err := db_client.NewMYSQLClient(prepareDBConfig(config))
 	if err != nil {
 		return nil, err
 	}
-	nsqClient, err := nsq_client.NewNsqClient(&nsq_client.NSQConfig{})
+	nsqClient, err := nsq_client.NewNsqClient(prepareNSQConfig(config))
 	if err != nil {
 		return nil, err
 	}
-	redisClient, err := redis_client.NewRedisClient(&redis_client.RedisConfig{
-		
-	})
+	redisClient, err := redis_client.NewRedisClient(prepareRedisConfig(config))
 	if err != nil {
 		return nil, err
 	}
-	temporalClient, err := temporal_client.NewTemporalClient(&temporal_client.TemporalConfig{})
+	temporalClient, err := temporal_client.NewTemporalClient(prepareTemporalConfig(config))
 	if err != nil {
 		return nil, err
 	}

@@ -31,7 +31,7 @@ func (r *Runners) Run(ctx context.Context) error {
 	for topic, consumer := range r.RunConsumers {
 		go func(topic string, consumer ConsumerFunc) {
 			log.Println(`execute consumer `, consumer)
-			err := r.nsq.RegisterConsumer(topic, func(msgCtx context.Context, key string) {
+			err := r.nsq.RegisterConsumer(topic, `channel`, func(msgCtx context.Context, key string) {
 				defer func() {
 					if r := recover(); r != nil {
 						log.Printf("Recovered from panic in consumer %s: %v", topic, r)

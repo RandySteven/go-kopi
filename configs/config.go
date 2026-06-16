@@ -24,13 +24,18 @@ type (
 			} `yaml:"server"`
 
 			// Postgres contains PostgreSQL database connection settings.
-			Postgres struct {
-				Host   string `yaml:"host"`
-				Port   string `yaml:"port"`
-				DbName string `yaml:"dbname"`
-				DbUser string `yaml:"dbuser"`
-				DbPass string `yaml:"dbpass"`
-			} `yaml:"postgres"`
+			Db struct {
+				Db              string `yaml:"db"`
+				Host            string `yaml:"host"`
+				Port            string `yaml:"port"`
+				DbName          string `yaml:"dbname"`
+				DbUser          string `yaml:"dbuser"`
+				DbPass          string `yaml:"dbpass"`
+				MaxIdleConns    int    `yaml:"max_idle_conns"`
+				MaxOpenConns    int    `yaml:"max_open_conns"`
+				ConnMaxLifeTime int    `yaml:"conn_max_lifetime"`
+				ConnMaxIdleTime int    `yaml:"conn_max_idletime"`
+			} `yaml:"db"`
 
 			// Mongodb contains MongoDB connection settings.
 			Mongodb struct {
@@ -42,20 +47,35 @@ type (
 
 			// Redis contains Redis cache connection settings.
 			Redis struct {
-				Host     string `yaml:"host"`
-				Port     string `yaml:"port"`
-				Password string `yaml:"password"`
+				Host            string `yaml:"host"`
+				Port            string `yaml:"port"`
+				Password        string `yaml:"password"`
+				PoolSize        int    `yaml:"pool_size"`
+				MinIdleConn     int    `yaml:"min_idle_conn"`
+				MaxIdleConn     int    `yaml:"max_idle_conn"`
+				PoolTimeout     int    `yaml:"pool_timeout"`
+				DialTimeout     int    `yaml:"dial_timeout"`
+				ReadTimeout     int    `yaml:"read_timeout"`
+				WriteTimeout    int    `yaml:"write_timeout"`
+				MaxRetries      int    `yaml:"max_retries"`
+				MaxRetryBackoff int    `yaml:"max_retry_backoff"`
+				MinRetryBackoff int    `yaml:"min_retry_backoff"`
+				ConnMaxIdleTime int    `yaml:"conn_max_idle_time"`
+				ConnMaxLifeTime int    `yaml:"conn_max_life_time"`
 			} `yaml:"redis"`
 
 			// NSQ contains NSQ message queue settings.
 			NSQ struct {
-				Host            string        `yaml:"host"`
-				Port            string        `yaml:"port"`
-				Topic           string        `yaml:"topic"`
-				Channel         string        `yaml:"channel"`
-				MaxInFlight     int           `yaml:"maxInFlight"`
-				MaxRequeueDelay time.Duration `yaml:"maxRequeueDelay"`
-				MaxRequeueCount int           `yaml:"maxRequeueCount"`
+				Host               string `yaml:"host"`
+				TCPPort            string `yaml:"tcp_port"`
+				LookupdHttpPort    string `yaml:"lookup_http_port"`
+				MaxInFlight        int    `yaml:"max_in_flight"`
+				ConcurrentConsumer int    `yaml:"concurrent_consumer"`
+				ReadTimeout        int    `yaml:"read_timeout"`
+				WriteTimeout       int    `yaml:"write_timeout"`
+				HeartbeatInterval  int    `yaml:"heartbeat_interval"`
+				BackoffMultiplier  int    `yaml:"backoff_multiplier"`
+				MaxBackoffDuration int    `yaml:"max_backoof_duration"`
 			} `yaml:"nsq"`
 
 			// Temporal contains Temporal workflow orchestration settings.

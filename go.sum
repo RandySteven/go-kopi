@@ -1,7 +1,7 @@
-github.com/RandySteven/go-cook/db v1.0.0 h1:1wviYErrmTel6aOlWVfPWX13IjpK0rgN8Kv9KkaZQyw=
-github.com/RandySteven/go-cook/db v1.0.0/go.mod h1:Olk4xu09gal/+K7+89ybcmcajAeck6MKyGwj7EgFal0=
-github.com/RandySteven/go-cook/nsq v1.0.0 h1:8zyHqt48Uqy72csggndXC6pLY6gQ3oQoDM+mUF9alH0=
-github.com/RandySteven/go-cook/nsq v1.0.0/go.mod h1:fHpbTNbjXBhT5WPA6eUy0FpKqVxfAb1iCcoDOHqkZq0=
+github.com/RandySteven/go-cook/db v1.0.1 h1:LDuBIcSdqwd00cFU0KHDL+tSXLU7CaNUDu86I3p6XYM=
+github.com/RandySteven/go-cook/db v1.0.1/go.mod h1:Olk4xu09gal/+K7+89ybcmcajAeck6MKyGwj7EgFal0=
+github.com/RandySteven/go-cook/nsq v1.0.1 h1:1d7s5SvktRiT8k7w7dwlVLQHacwt3eZl9VIKwY/KwsQ=
+github.com/RandySteven/go-cook/nsq v1.0.1/go.mod h1:fHpbTNbjXBhT5WPA6eUy0FpKqVxfAb1iCcoDOHqkZq0=
 github.com/RandySteven/go-cook/redis v1.0.0 h1:JW4k2hg7qG0Nkg41W+lSUegDfI3yyJQb1oo9BL7q/00=
 github.com/RandySteven/go-cook/redis v1.0.0/go.mod h1:xwlMF+oW4b6dT9mclnyMJHl6qFKhBl6Og/QZfI6Knas=
 github.com/RandySteven/go-cook/security v1.0.0 h1:l+bVX/qkzy2YbNRSMpQtuqntQDkdtXB6RJYO6ZUWnHg=
