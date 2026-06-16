@@ -8,7 +8,7 @@ import (
 
 type (
 	Consumers struct {
-		//DummyConsumer       consumer_interfaces.DummyConsumer
+		DummyConsumer DummyConsumer
 	}
 
 	RunConsumer map[string]ConsumerFunc
@@ -24,5 +24,7 @@ func NewConsumers(
 	cache *caches.Caches,
 	topics *topics.Topics,
 ) *Consumers {
-	return &Consumers{}
+	return &Consumers{
+		DummyConsumer: NewDummyConsumer(),
+	}
 }

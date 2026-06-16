@@ -91,6 +91,10 @@ func NewEndpointRouters(api *handlers.Handlers) RouterPrefix {
 		Post("LoginUser", "/login", api.UserHandler.LoginUser),
 	}
 
+	endpointRouters[enums.DummyPrefix] = []*Router{
+		Get("DummyRequest", `/`, api.DummyHandler.DummyRequest),
+	}
+
 	return endpointRouters
 }
 
@@ -127,10 +131,16 @@ func InitRouter(routers RouterPrefix, r *mux.Router) {
 		routers.RouterLog(enums.AuthPrefix.ToString())
 		onboardingRouter.HandleFunc(routers.path, routers.handler).Methods(routers.method)
 	}
+
+	dummyRouter := r.PathPrefix(enums.DummyPrefix.ToString()).Subrouter()
+	for _, routers := range routers[enums.DummyPrefix] {
+		routers.RouterLog(enums.DummyPrefix.ToString())
+		dummyRouter.HandleFunc(routers.path, routers.handler).Methods(routers.method)
+	}
 }
 
 // RouterLog prints route information to the console during startup.
 // Format: "METHOD | /prefix/path"
 func (router *Router) RouterLog(prefix string) {
-	log.Printf("%12s | %4s/ \n", router.method, prefix+router.path)
+	log.Printf("%12s | %4s \n", router.method, prefix+router.path)
 }

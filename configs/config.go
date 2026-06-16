@@ -31,6 +31,7 @@ type (
 				DbName          string `yaml:"dbname"`
 				DbUser          string `yaml:"dbuser"`
 				DbPass          string `yaml:"dbpass"`
+				SSLMode         string `yaml:"ssl_mode"`
 				MaxIdleConns    int    `yaml:"max_idle_conns"`
 				MaxOpenConns    int    `yaml:"max_open_conns"`
 				ConnMaxLifeTime int    `yaml:"conn_max_lifetime"`

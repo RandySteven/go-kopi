@@ -53,8 +53,9 @@ func NewApp(config *configs.Config) (*App, error) {
 func (a *App) PrepareHttpHandler(ctx context.Context) *rest_handler.Handlers {
 	repositories := repositories.NewRepositories(a.MySQL.Client())
 	caches := caches.NewCaches(a.Redis.Client())
+	topics := topics.NewTopics(a.Nsq)
 	usecases := usecases.NewUsecases(repositories, caches, a.Nsq, a.Temporal)
-	return rest_handler.NewHandlers(usecases)
+	return rest_handler.NewHandlers(usecases, topics)
 }
 
 func (a *App) RefreshRedis(ctx context.Context) error {
@@ -65,12 +66,15 @@ func (a *App) PrepareJobScheduler(ctx context.Context) {
 
 }
 
-func (a *App) PrepareConsumer(ctx context.Context) *consumers.Consumers {
+func (a *App) PrepareConsumer(ctx context.Context) *consumers.Runners {
 	topics := topics.NewTopics(a.Nsq)
 	repositories := repositories.NewRepositories(a.MySQL.Client())
 	caches := caches.NewCaches(a.Redis.Client())
-	consumers := consumers.NewConsumers(repositories, caches, topics)
-	return consumers
+	consumerFuncs := consumers.NewConsumers(repositories, caches, topics)
+
+	consumerRunner := consumers.InitRunner(a.Nsq, `consumer-string`)
+	a.registerConsumers(consumerRunner, consumerFuncs)
+	return consumerRunner
 }
 
 func (a *App) ExecuteMigration(ctx context.Context) error {

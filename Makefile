@@ -28,6 +28,9 @@ seed:
 drop:
 	${gorun} ${cmd_folder}drop -config ${yaml_file}
 
+consumer:
+	${gorun} ${cmd_folder}consumers -config ${yaml_file}
+
 test_env:
 	${yaml_file}
 
