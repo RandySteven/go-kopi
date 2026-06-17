@@ -114,6 +114,10 @@ func Serve() {
 
 	apis := app.PrepareHttpHandler(ctx)
 	r := mux.NewRouter()
+	if apis == nil {
+		log.Fatalln("api is not valid")
+		return
+	}
 	router := routes.NewEndpointRouters(apis)
 	routes.InitRouter(router, r)
 

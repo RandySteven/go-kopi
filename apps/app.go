@@ -2,6 +2,7 @@ package apps
 
 import (
 	"context"
+	"os"
 
 	db_client "github.com/RandySteven/go-cook/db"
 	nsq_client "github.com/RandySteven/go-cook/nsq"
@@ -71,8 +72,11 @@ func (a *App) PrepareConsumer(ctx context.Context) *consumers.Runners {
 	repositories := repositories.NewRepositories(a.MySQL.Client())
 	caches := caches.NewCaches(a.Redis.Client())
 	consumerFuncs := consumers.NewConsumers(repositories, caches, topics)
-
-	consumerRunner := consumers.InitRunner(a.Nsq, `consumer-string`)
+	channelName := os.Getenv(`NSQ_CHANNEL`)
+	if channelName == `` {
+		channelName = `default`
+	}
+	consumerRunner := consumers.InitRunner(a.Nsq, channelName)
 	a.registerConsumers(consumerRunner, consumerFuncs)
 	return consumerRunner
 }

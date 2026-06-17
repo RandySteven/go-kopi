@@ -76,7 +76,7 @@ type (
 				WriteTimeout       int    `yaml:"write_timeout"`
 				HeartbeatInterval  int    `yaml:"heartbeat_interval"`
 				BackoffMultiplier  int    `yaml:"backoff_multiplier"`
-				MaxBackoffDuration int    `yaml:"max_backoof_duration"`
+				MaxBackoffDuration int    `yaml:"max_backoff_duration"`
 			} `yaml:"nsq"`
 
 			// Temporal contains Temporal workflow orchestration settings.

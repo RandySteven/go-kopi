@@ -105,7 +105,6 @@ func (s *ServerMiddleware) LoggingMiddleware(next http.Handler) http.Handler {
 		file, err := utils.WriteLogFile()
 		if err != nil {
 			log.Printf("failed to write log file: %v \n", err)
-			return
 		}
 
 		log.SetOutput(file)

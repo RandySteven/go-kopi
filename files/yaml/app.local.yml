@@ -56,10 +56,10 @@ configs:
     max_in_flight: 10
     concurrent_consumer: 1
     read_timeout: 60
-    write_timeout: 1
+    write_timeout: 30
     heartbeat_interval: 30
     backoff_multiplier: 2
-    max_backoof_duration: 120
+    max_backoff_duration: 120
 
   # Temporal Workflow Configuration
   temporal:

@@ -2,6 +2,7 @@ package topics
 
 import (
 	"context"
+	"log"
 
 	nsq_client "github.com/RandySteven/go-cook/nsq"
 )
@@ -23,7 +24,12 @@ func (d *dummyTopic) ReadMessage(ctx context.Context) (value string, err error) 
 
 // WriteMessage implements [DummyTopic].
 func (d *dummyTopic) WriteMessage(ctx context.Context, value string) (err error) {
-	return d.nsq.Publish(ctx, `dummy-topic`, []byte(value))
+	err = d.nsq.Publish(ctx, `dummy-topic`, []byte(value))
+	if err != nil {
+		log.Println(`failed to publish `, err)
+		return err
+	}
+	return nil
 }
 
 var _ DummyTopic = &dummyTopic{}

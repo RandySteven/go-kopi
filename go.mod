@@ -3,8 +3,8 @@ module github.com/RandySteven/go-kopi
 go 1.26.1
 
 require (
-	github.com/RandySteven/go-cook/db v1.0.2-0.20260616154350-237df41b2432
-	github.com/RandySteven/go-cook/nsq v1.0.2-0.20260616152510-aca387ced015
+	github.com/RandySteven/go-cook/db v1.0.2
+	github.com/RandySteven/go-cook/nsq v1.0.2
 	github.com/RandySteven/go-cook/redis v1.0.0
 	github.com/RandySteven/go-cook/security v1.0.0
 	github.com/RandySteven/go-cook/temporal v1.0.0

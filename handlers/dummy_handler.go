@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/RandySteven/go-kopi/topics"
@@ -22,7 +23,10 @@ type (
 func (d *DummyHandler) DummyRequest(w http.ResponseWriter, r *http.Request) {
 	dataKey := `foo`
 	ctx := context.Background()
-	d.dummyTopic.WriteMessage(ctx, `hello mother focker`)
+	err := d.dummyTopic.WriteMessage(ctx, `foo bar`)
+	if err != nil {
+		log.Println("failed to publish err", err)
+	}
 	utils.ResponseHandler(w, http.StatusOK, `hello`, &dataKey, nil, nil)
 }
 
