@@ -1,43 +1,42 @@
 include ./files/env/.env
 export
 
-
-yaml_file = ./files/yaml/app.local.yml
 cmd_folder = ./cmd/
 gorun = @go run
 
+# ── Environment ────────────────────────────────────────────────
 ifeq ($(ENV),prod)
-	yaml_file = ./files/yaml/app.prod.yml
+    yaml_file = ./files/yaml/app.prod.yml
 else ifeq ($(ENV),staging)
-	yaml_file = ./files/yaml/app.docker.yml
+    yaml_file = ./files/yaml/app.docker.yml
 else ifeq ($(ENV),dev)
-	yaml_file = ./files/yaml/app.local.yml
+    yaml_file = ./files/yaml/app.local.yml
 else
-	$(error unknown variable in .env file)
+    yaml_file = ./files/yaml/app.local.yml
 endif
 
+# ── Server ─────────────────────────────────────────────────────
+.PHONY: run migration seed drop consumer refresh
+
 run:
-	${gorun} ${cmd_folder}main -config ${yaml_file}
+	$(gorun) $(cmd_folder)main -config $(yaml_file)
 
 migration:
-	${gorun} ${cmd_folder}migration -config ${yaml_file}
+	$(gorun) $(cmd_folder)migration -config $(yaml_file)
 
 seed:
-	${gorun} ${cmd_folder}seed -config ${yaml_file}
+	$(gorun) $(cmd_folder)seed -config $(yaml_file)
 
 drop:
-	${gorun} ${cmd_folder}drop -config ${yaml_file}
+	$(gorun) $(cmd_folder)drop -config $(yaml_file)
 
 consumer:
-	${gorun} ${cmd_folder}consumers -config ${yaml_file}
-
-test_env:
-	${yaml_file}
-
-env_check:
-	$(ENV)
+	$(gorun) $(cmd_folder)consumers -config $(yaml_file)
 
 refresh: drop migration seed
+
+# ── Docker ─────────────────────────────────────────────────────
+.PHONY: run-docker stop-docker
 
 run-docker:
 	docker compose up --build -d
@@ -45,29 +44,29 @@ run-docker:
 stop-docker:
 	docker compose down
 
-define create_model
-    $(eval MODELNAME := $(shell bash -c 'read -p "Model name : " modelfile; echo $$modelfile'))
-    $(eval LOWER_FIRST_CHAR := $(shell echo $(MODELNAME) | cut -c1 | tr '[:upper:]' '[:lower:]'))
-    $(eval UPPER_FIRST_CHAR := $(shell echo $(MODELNAME) | cut -c1 ))
-    $(eval MODELFILE := $(subst $(UPPER_FIRST_CHAR),$(LOWER_FIRST_CHAR),$(MODELNAME)))
-    @echo "Creating model file: $(MODELFILE).go"
-    @echo "Creating repository file: $(MODELFILE)_repository.go"
-    @echo "package model" > $(MODELFILE).go
-    @echo "type $(MODELNAME) struct {}" >> $(MODELFILE).go
-    @echo "package repositories" > $(MODELFILE)_repository.go
-    @echo "" >> $(MODELFILE)_repository.go
-    @echo "import \"models\"" >> $(MODELFILE)_repository.go
-    @echo "" >> $(MODELFILE)_repository.go
-    @echo "type I$(MODELNAME)Repository interface{" >> $(MODELFILE)_repository.go
-    @echo "    IRepository[models.$(MODELNAME)]" >> $(MODELFILE)_repository.go
-    @echo "}" >> $(MODELFILE)_repository.go
-endef
-
-
-.PHONY: make_model
+# ── Codegen ────────────────────────────────────────────────────
+.PHONY: make_model gen_proto
 
 make_model:
-	$(call create_model)
+	@read -p "Model name: " MODELNAME; \
+	MODELFILE=$$(echo $$MODELNAME | sed 's/^./\l&/'); \
+	echo "Creating model: $$MODELFILE.go"; \
+	echo "package model" > $$MODELFILE.go; \
+	echo "type $$MODELNAME struct {}" >> $$MODELFILE.go; \
+	echo "Creating repository: $${MODELFILE}_repository.go"; \
+	printf 'package repositories\n\nimport "models"\n\ntype I%sRepository interface {\n    IRepository[models.%s]\n}\n' \
+		$$MODELNAME $$MODELNAME > $${MODELFILE}_repository.go
 
 gen_proto:
-	protoc --go_out=./proto --go-grpc_out=./proto --proto_path=./proto ./proto/service.proto
+	protoc \
+		--go_out=./proto \
+		--go-grpc_out=./proto \
+		--proto_path=./proto \
+		./proto/service.proto
+
+# ── Debug ──────────────────────────────────────────────────────
+.PHONY: env_check
+
+env_check:
+	@echo "ENV:       $(ENV)"
+	@echo "yaml_file: $(yaml_file)"
