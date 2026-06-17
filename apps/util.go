@@ -6,6 +6,7 @@ import (
 	redis_client "github.com/RandySteven/go-cook/redis"
 	temporal_client "github.com/RandySteven/go-cook/temporal"
 	"github.com/RandySteven/go-kopi/configs"
+	"github.com/RandySteven/go-kopi/consumers"
 )
 
 func prepareDBConfig(config *configs.Config) *db_client.DBConfig {
@@ -13,10 +14,11 @@ func prepareDBConfig(config *configs.Config) *db_client.DBConfig {
 
 	return &db_client.DBConfig{
 		Db:              dbConfig.Db,
-		DbUser:          dbConfig.Host,
+		DbUser:          dbConfig.DbUser,
 		DbPass:          dbConfig.DbPass,
 		DbHost:          dbConfig.Host,
 		DbName:          dbConfig.DbName,
+		SSLMode:         dbConfig.SSLMode,
 		MaxIdleConns:    dbConfig.MaxIdleConns,
 		MaxOpenConns:    dbConfig.MaxOpenConns,
 		ConnMaxLifeTime: dbConfig.ConnMaxIdleTime,
@@ -78,4 +80,8 @@ func prepareTemporalConfig(config *configs.Config) *temporal_client.TemporalConf
 	cfg.WorkerOptions.WorkerLocalActivitiesPerSecond = temporalConfig.WorkerOptions.WorkerLocalActivitiesPerSecond
 
 	return cfg
+}
+
+func (a *App) registerConsumers(runners *consumers.Runners, consumerFunc *consumers.Consumers) {
+	runners.RegisterConsumer(`dummy-topic`, consumerFunc.DummyConsumer.DummyFunc)
 }
