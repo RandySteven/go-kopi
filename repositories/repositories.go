@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	repository_interfaces "github.com/RandySteven/go-kopi/interfaces/repositories"
+	repository_interfaces "github.com/RandySteven/go-cook/db"
 )
 
 type Repositories struct {
-	UserRepository repository_interfaces.UserRepository
+	UserRepository UserRepository
 }
 
 func NewRepositories(db *sql.DB) *Repositories {

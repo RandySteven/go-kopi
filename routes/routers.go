@@ -15,7 +15,7 @@ import (
 	"net/http"
 
 	"github.com/RandySteven/go-kopi/enums"
-	rest_handler "github.com/RandySteven/go-kopi/handlers/rests"
+	"github.com/RandySteven/go-kopi/handlers"
 	"github.com/RandySteven/go-kopi/middlewares"
 	"github.com/gorilla/mux"
 )
@@ -77,7 +77,7 @@ type (
 //	    Put("UpdateUser", "/{id}", api.UserHTTP.UpdateUser, enums.AuthenticationMiddleware),
 //	    Delete("DeleteUser", "/{id}", api.UserHTTP.DeleteUser, enums.AuthenticationMiddleware),
 //	}
-func NewEndpointRouters(api *rest_handler.Rests) RouterPrefix {
+func NewEndpointRouters(api *handlers.Handlers) RouterPrefix {
 	endpointRouters := make(RouterPrefix)
 
 	// ============================================================
@@ -87,8 +87,12 @@ func NewEndpointRouters(api *rest_handler.Rests) RouterPrefix {
 	// POST /auth/login    - Authenticate user and get token
 	// ============================================================
 	endpointRouters[enums.AuthPrefix] = []*Router{
-		Post("RegisterUser", "/register", api.UserRest.RegisterUser),
-		Post("LoginUser", "/login", api.UserRest.LoginUser),
+		Post("RegisterUser", "/register", api.UserHandler.RegisterUser),
+		Post("LoginUser", "/login", api.UserHandler.LoginUser),
+	}
+
+	endpointRouters[enums.DummyPrefix] = []*Router{
+		Get("DummyRequest", ``, api.DummyHandler.DummyRequest),
 	}
 
 	return endpointRouters
@@ -124,13 +128,28 @@ func InitRouter(routers RouterPrefix, r *mux.Router) {
 
 	onboardingRouter := r.PathPrefix(enums.AuthPrefix.ToString()).Subrouter()
 	for _, routers := range routers[enums.AuthPrefix] {
-		routers.RouterLog(enums.AuthPrefix.ToString())
 		onboardingRouter.HandleFunc(routers.path, routers.handler).Methods(routers.method)
 	}
+
+	dummyRouter := r.PathPrefix(enums.DummyPrefix.ToString()).Subrouter()
+	for _, routers := range routers[enums.DummyPrefix] {
+		dummyRouter.HandleFunc(routers.path, routers.handler).Methods(routers.method)
+	}
+	
+	routerLog(r)
 }
 
-// RouterLog prints route information to the console during startup.
-// Format: "METHOD | /prefix/path"
-func (router *Router) RouterLog(prefix string) {
-	log.Printf("%12s | %4s/ \n", router.method, prefix+router.path)
+// log checking registered router
+func routerLog(r *mux.Router) {
+	r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		path, _ := route.GetPathTemplate()
+		methods, _ := route.GetMethods()
+	
+		if len(methods) == 0 {
+			log.Printf("         %-30s (subrouter)", path)
+		} else {
+			log.Printf("%-8s %-30s", methods[0], path)
+		}
+		return nil
+	})
 }
