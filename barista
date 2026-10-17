@@ -18,6 +18,14 @@ NC='\033[0m' # No Color
 REPO_URL="https://github.com/RandySteven/go-kopi.git"
 DEFAULT_BRANCH="v3.0"
 
+required_go_version() {
+    if [ -f "go.mod" ]; then
+        grep -E '^go ' go.mod | awk '{print $2}'
+    else
+        echo "1.26"
+    fi
+}
+
 print_banner() {
     echo -e "${CYAN}"
     cat << "EOF"
@@ -42,6 +50,7 @@ print_help() {
     echo "  setup         Set up the project (copy config files, install deps)"
     echo "  remote        Change git remote to your own repository"
     echo "  refill        Pull latest changes from upstream go-kopi"
+    echo "  deps          Install go-cook modules and optional dependencies (install_mod.sh)"
     echo "  gen_proto     Generate proto file"
     echo "  help          Show this help message"
     echo ""
@@ -91,11 +100,14 @@ check_requirements() {
         exit 1
     fi
     
+    local required_go
+    required_go=$(required_go_version)
+
     if ! command -v go &> /dev/null; then
-        log_warning "Go is not installed. You'll need Go 1.24+ to run this project."
+        log_warning "Go is not installed. You'll need Go ${required_go}+ to run this project."
     else
         GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-        log_info "Go version: $GO_VERSION"
+        log_info "Go version: $GO_VERSION (go.mod requires ${required_go})"
     fi
     
     log_success "Requirements check completed"
@@ -147,7 +159,51 @@ pull_upstream() {
     git fetch upstream "$DEFAULT_BRANCH"
     git merge upstream/"$DEFAULT_BRANCH" --allow-unrelated-histories -m "Merge upstream changes"
     
+    install_go_dependencies
+
     log_success "Successfully refilled with latest changes from upstream"
+}
+
+install_go_cook_modules() {
+    if [ ! -f "install_mod.sh" ]; then
+        return
+    fi
+
+    log_info "Ensuring go-cook modules match install_mod.sh..."
+    while IFS= read -r line; do
+        case "$line" in
+            go\ get\ github.com/RandySteven/go-cook/*)
+                go get ${line#go get }
+                ;;
+        esac
+    done < install_mod.sh
+}
+
+install_go_dependencies() {
+    if [ ! -f "go.mod" ]; then
+        log_warning "go.mod not found, skipping dependency install"
+        return
+    fi
+
+    log_info "Downloading Go dependencies..."
+    go mod download
+    install_go_cook_modules
+    go mod tidy
+    log_success "Go dependencies installed"
+}
+
+install_optional_dependencies() {
+    check_requirements
+    install_go_dependencies
+
+    if [ -f "install_mod.sh" ]; then
+        log_info "Running install_mod.sh for optional integrations..."
+        bash install_mod.sh
+        go mod tidy
+        log_success "Optional dependencies installed"
+    else
+        log_warning "install_mod.sh not found, only core go.mod dependencies were installed"
+    fi
 }
 
 setup_project() {
@@ -173,13 +229,7 @@ setup_project() {
         log_warning "files/yaml/app.local.yml already exists, skipping"
     fi
     
-    # Download Go dependencies
-    if [ -f "go.mod" ]; then
-        log_info "Downloading Go dependencies..."
-        go mod download
-        go mod tidy
-        log_success "Go dependencies installed"
-    fi
+    install_go_dependencies
     
     log_success "Project setup completed"
     
@@ -189,6 +239,7 @@ setup_project() {
     echo "2. Edit files/yaml/app.local.yml with your database config"
     echo "3. Run 'make migration' to set up the database"
     echo "4. Run 'make run' to start the server"
+    echo "5. Run './barista deps' when you need optional integrations from install_mod.sh"
 }
 
 change_remote() {
@@ -301,7 +352,7 @@ BRANCH="$DEFAULT_BRANCH"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        brew|clone|refill|setup|remote|help)
+        brew|clone|refill|setup|remote|deps|gen_proto|help)
             COMMAND="$1"
             shift
             ;;
@@ -344,16 +395,20 @@ case $COMMAND in
         pull_upstream
         ;;
     setup)
+        check_requirements
         setup_project
+        ;;
+    deps)
+        install_optional_dependencies
         ;;
     remote)
         change_remote "$NEW_REMOTE"
         ;;
-    help|"")
-        print_help
-        ;;
     gen_proto)
         make gen_proto
+        ;;
+    help|"")
+        print_help
         ;;
     *)
         log_error "Unknown command: $COMMAND"

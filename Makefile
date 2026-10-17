@@ -57,6 +57,18 @@ make_model:
 	printf 'package repositories\n\nimport "models"\n\ntype I%sRepository interface {\n    IRepository[models.%s]\n}\n' \
 		$$MODELNAME $$MODELNAME > $${MODELFILE}_repository.go
 
+make_workflow:
+	@read -p "Workflow name: " WORKFLOWNAME; \
+	DIR="logic/$${WORKFLOWNAME}_workflow"; \
+	mkdir -p $$DIR; \
+	PKG="$${WORKFLOWNAME}_workflow"; \
+	STRUCT="$${WORKFLOWNAME}Workflow"; \
+	INTERFACE="$$(echo $$WORKFLOWNAME | sed 's/^./\u&/')Workflow"; \
+	FILE="$$DIR/workflow.go"; \
+	echo "Creating workflow at $$FILE"; \
+	printf 'package %s\n\nimport "github.com/RandySteven/go-cook/temporal_client"\n\ntype %s struct {}\n\ntype %s interface {\n    IWorkflow[temporal_client.%s]\n}\n' \
+		"$$PKG" "$$STRUCT" "$$INTERFACE" "$$(echo $$WORKFLOWNAME | sed 's/^./\u&/')" > "$$FILE"
+
 gen_proto:
 	protoc \
 		--go_out=./proto \
