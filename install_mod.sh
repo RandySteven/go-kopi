@@ -1,3 +1,8 @@
+go get github.com/RandySteven/go-cook/db@v1.0.7
+go get github.com/RandySteven/go-cook/nsq@v1.0.3
+go get github.com/RandySteven/go-cook/redis@v1.0.0
+go get github.com/RandySteven/go-cook/security@v1.0.0
+go get github.com/RandySteven/go-cook/temporal@v1.1.2
 go get github.com/midtrans/midtrans-go
 go get github.com/iancoleman/strcase
 go get github.com/nfnt/resize

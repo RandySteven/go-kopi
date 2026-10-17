@@ -16,18 +16,18 @@ A Go backend framework with clean architecture, supporting PostgreSQL, Redis, NS
 Create a new project by asking your barista to brew one:
 
 ```bash
-# Brew a fresh project
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3/barista | bash -s -- brew -n my-project
+# Brew a fresh project (latest stable tag: v3.1.0)
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3.1.0/barista | bash -s -- brew -n my-project
 
 # Or with your own git remote
-curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
+curl -fsSL https://raw.githubusercontent.com/RandySteven/go-kopi/v3.1.0/barista | bash -s -- brew -n my-project -r https://github.com/youruser/my-project.git
 ```
 
 ### Manual Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/RandySteven/go-kopi.git my-project
+# Clone the repository at the latest stable tag
+git clone --branch v3.1.0 --single-branch https://github.com/RandySteven/go-kopi.git my-project
 cd my-project
 
 # Run setup
@@ -44,8 +44,9 @@ cd my-project
 | `./barista brew -n <name>` | Brew a fresh project (clone + setup + remote) |
 | `./barista clone -n <name>` | Clone to a new project directory |
 | `./barista setup` | Set up config files and install dependencies |
+| `./barista deps` | Install go-cook pins and optional deps (`install_mod.sh`) |
 | `./barista remote -r <url>` | Change git remote to your own repo |
-| `./barista refill` | Refill with latest updates from upstream go-kopi |
+| `./barista refill` | Merge latest upstream template (default tag: `v3.1.0`) |
 | `./barista help` | Show help message |
 
 ### Keeping Up to Date

@@ -3,11 +3,11 @@ module github.com/RandySteven/go-kopi
 go 1.26.1
 
 require (
-	github.com/RandySteven/go-cook/db v1.0.2
-	github.com/RandySteven/go-cook/nsq v1.0.2
+	github.com/RandySteven/go-cook/db v1.0.7
+	github.com/RandySteven/go-cook/nsq v1.0.3
 	github.com/RandySteven/go-cook/redis v1.0.0
 	github.com/RandySteven/go-cook/security v1.0.0
-	github.com/RandySteven/go-cook/temporal v1.0.0
+	github.com/RandySteven/go-cook/temporal v1.1.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
