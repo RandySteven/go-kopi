@@ -7,7 +7,7 @@
         \/                         \/     |__|       
 ```
 
-A Go backend framework with clean architecture, supporting PostgreSQL, Redis, NSQ, and Temporal workflows.
+A Go backend with clean architecture, supporting MySQL, Redis, NSQ, and Temporal workflows. Register and activation run through the onboarding workflow.
 
 ## Quick Start
 
@@ -63,9 +63,9 @@ This will merge the latest changes while preserving your customizations.
 
 | Category        | Technology |
 |-----------------|------------|
-| Language        | Go 1.26 |
+| Language        | Go 1.27 |
 | HTTP Router     | [Gorilla Mux](https://github.com/gorilla/mux) |
-| Database        | PostgreSQL ([go-cook/db](https://github.com/RandySteven/go-cook)) |
+| Database        | MySQL ([go-cook/db](https://github.com/RandySteven/go-cook)) |
 | Document Store  | MongoDB (mongo-driver) |
 | Cache           | Redis (go-redis/v9) |
 | Message Queue   | NSQ |
@@ -113,7 +113,7 @@ This project follows a **layered architecture** pattern:
               ▼               ▼               ▼
 ┌─────────────────┐  ┌─────────────┐  ┌───────────────┐
 │   repositories  │  │   caches    │  │  NSQ/Temporal │
-│  (PostgreSQL)   │  │   (Redis)   │  │  (Publish)    │
+│    (MySQL)      │  │   (Redis)   │  │  (Publish)    │
 └─────────────────┘  └─────────────┘  └───────────────┘
 ```
 
@@ -142,7 +142,7 @@ The `apps` package wires infrastructure clients and exposes factory methods (`Pr
               ▼                               ▼
 ┌─────────────────────┐            ┌─────────────────┐
 │     repositories    │            │     caches      │
-│    (PostgreSQL)     │            │     (Redis)     │
+│       (MySQL)       │            │     (Redis)     │
 └─────────────────────┘            └─────────────────┘
 ```
 
@@ -163,6 +163,7 @@ The `apps` package wires infrastructure clients and exposes factory methods (`Pr
 | handlers     | HTTP handlers |
 | interfaces   | Shared interface definitions |
 | jobs         | Scheduled job handlers |
+| logic        | Temporal workflows. `logic/onboarding` is register and activation |
 | middlewares  | HTTP middleware (auth, logging, CORS, rate limiting) |
 | proto        | gRPC/protobuf service definitions |
 | queries      | Raw SQL queries and migrations |
@@ -176,11 +177,11 @@ The `apps` package wires infrastructure clients and exposes factory methods (`Pr
 
 ### Prerequisites
 
-- Go 1.26+
-- PostgreSQL
+- Go 1.27+
+- MySQL
 - Redis
 - NSQ (optional, for async processing)
-- Temporal (optional, for workflows)
+- Temporal (required for `POST /auth/register` and `POST /auth/activated`)
 
 ### Configuration
 
@@ -203,7 +204,10 @@ cp files/yaml/app.example.yml files/yaml/app.local.yml
 ENV=dev
 
 SECRET_JWT='your-jwt-secret'
+ACTIVATION_JWT_KEY='your-activation-secret'
 ```
+
+`ACTIVATION_JWT_KEY` signs the onboarding activation token. When it is empty, the workflow uses a built-in development key.
 
 4. Update `app.local.yml` with your database and server config:
 
@@ -218,9 +222,10 @@ configs:
       write: 10
       idle: 5
 
-  postgres:
+  db:
+    db: "mysql"
     host: "localhost"
-    port: "5432"
+    port: "3306"
     dbname: "your_database"
     dbuser: "your_user"
     dbpass: "your_password"
@@ -270,6 +275,50 @@ make migration
 make run
 ```
 
+## Onboarding workflow
+
+`POST /auth/register` starts Temporal workflow `onboarding_workflow_execution`. The handler returns after the user row exists and an activation token is ready. The workflow stays parked until `POST /auth/activated`.
+
+| Step | Activity | What it does |
+|------|----------|----------------|
+| 1 | `persist_onboarding_request_activity` | Inserts `onboardings` with status `PENDING` |
+| 2 | `register_user_activity` | Inserts `users` with status `PROCESSING`, sets onboarding to `ACTIVE`, and publishes the `RegisterResponse` query |
+| 3 | `update_onboarding_status_activity` | Waits for signal `activated_user_signal`, then sets onboarding to `ONBOARDED` and the user to `ACTIVE` |
+
+`register_as` defaults to `USER`. Any other value is rejected.
+
+### `POST /auth/register`
+
+```bash
+curl -s -X POST http://localhost:8080/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "first_name": "Randy",
+    "last_name": "Steven",
+    "email": "randy@example.com",
+    "username": "randy",
+    "password": "secret123",
+    "phone_number": "08123456789",
+    "address": "Jakarta",
+    "register_as": "USER",
+    "additional_info": { "occupation": "engineer" }
+  }'
+```
+
+The `201` body includes `activation_token`. Copy it for activation. The token expires in 15 minutes.
+
+### `POST /auth/activated`
+
+```bash
+curl -s -X POST http://localhost:8080/auth/activated \
+  -H 'Content-Type: application/json' \
+  -d '{"token":"<activation_token>"}'
+```
+
+A successful activation returns `200` with `"activate": true`.
+
+`POST /auth/login` remains registered and is separate from this workflow.
+
 ### Testing
 
 ```bash
@@ -299,7 +348,8 @@ Example route registration:
 
 ```go
 endpointRouters[enums.AuthPrefix] = []*Router{
-    Post("RegisterUser", "/register", api.UserHandler.RegisterUser),
+    Post("RegisterUser", "/register", api.OnboardingHandler.RegisterUser),
+    Post("ActivationUser", "/activated", api.OnboardingHandler.ActivateUser),
     Post("LoginUser", "/login", api.UserHandler.LoginUser),
 }
 ```
