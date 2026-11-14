@@ -1,14 +1,21 @@
 package consumers
 
 import (
-	"github.com/RandySteven/go-kopi/caches"
-	"github.com/RandySteven/go-kopi/repositories"
-	"github.com/RandySteven/go-kopi/topics"
+	"context"
+
+	"github.com/RandySteven/jlpt-exercise-be/caches"
+	"github.com/RandySteven/jlpt-exercise-be/repositories"
+	"github.com/RandySteven/jlpt-exercise-be/topics"
+	"github.com/nsqio/go-nsq"
 )
 
 type (
 	Consumers struct {
 		DummyConsumer DummyConsumer
+	}
+
+	Consumer interface {
+		Consume(ctx context.Context, nsqMessage *nsq.Message) error
 	}
 
 	RunConsumer map[string]ConsumerFunc

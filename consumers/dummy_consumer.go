@@ -3,11 +3,13 @@ package consumers
 import (
 	"context"
 	"log"
+
+	"github.com/nsqio/go-nsq"
 )
 
 type (
 	DummyConsumer interface {
-		DummyFunc(ctx context.Context, body string) (err error)
+		Consumer
 	}
 
 	dummyConsumer struct {
@@ -15,8 +17,8 @@ type (
 )
 
 // DummyFunc implements [DummyConsumer].
-func (d *dummyConsumer) DummyFunc(ctx context.Context, body string) (err error) {
-	log.Println(body)
+func (d *dummyConsumer) Consume(ctx context.Context, nsqMessage *nsq.Message) error {
+	log.Println(nsqMessage.Body)
 	return nil
 }
 
